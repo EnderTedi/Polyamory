@@ -1,0 +1,21 @@
+{
+  /*
+   | This file is automatically updated by ModManifestBuilder
+   | when the project is compiled.
+   | 
+   | Changes made to this file may be overwritten.
+   | 
+   */
+  "$schema": "https://smapi.io/schemas/manifest.json",
+  "UniqueID": "EnderTedi.Polyamory",
+  "Name": "Polyamory",
+  "Author": "EnderTedi",
+  "Version": "1.0.0-Debug",
+  "Description": "Polyamory with exclusions",
+  "MinimumApiVersion": "4.0.0",
+  "MinimumGameVersion": "1.6.0",
+  "EntryDll": "Polyamory.dll",
+  "UpdateKeys": [
+    "Nexus:???"
+  ]
+}

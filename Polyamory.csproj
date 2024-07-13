@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<UniqueId>EnderTedi.Polyamory</UniqueId>
+	<Authors>EnderTedi</Authors>
+	<Description>Polyamory with exclusions</Description>
+	<MinimumApiVersion>4.0.0</MinimumApiVersion>
+	<MinimumGameVersion>1.6.0</MinimumGameVersion>
+	  <EnableHarmony>true</EnableHarmony>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Leclair.Stardew.ModManifestBuilder" Version="2.3.1" />
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.1.1" />
+    <PackageReference Include="Pathoschild.Stardew.ModTranslationClassBuilder" Version="2.0.1" />
+  </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties i18n_4default_1json__JsonSchema="https://smapi.io/json/schemas/i18n" /></VisualStudio></ProjectExtensions>
+
+</Project>
