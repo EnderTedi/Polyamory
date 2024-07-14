@@ -10,6 +10,7 @@
 	<MinimumApiVersion>4.0.0</MinimumApiVersion>
 	<MinimumGameVersion>1.6.0</MinimumGameVersion>
 	  <EnableHarmony>true</EnableHarmony>
+	  <UpdateKeys>Nexus:26081</UpdateKeys>
   </PropertyGroup>
 
   <ItemGroup>

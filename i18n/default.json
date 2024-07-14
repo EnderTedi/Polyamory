@@ -1,3 +1,31 @@
 {
-  "e":  "e"
+  "PlayerMarriage.MarriedToNonPolyamorousNPC": "You or the farmer you are attempting to marry is currently married to a monogamous NPC.",
+  "NPCMarriage.MarriedToNonPolyamorousNPC": "You are currently married to a monogamous NPC.",
+  "NPCMarriage.IsNonPolyamorousNPC": "{0} is monogamous and you're already married to someone else.",
+
+  "Config.Section.Pendant":  "Mermaid's Pendant",
+  "Config.BuyPendantsAnytime.Name": "Buy Pendants Anytime",
+  "Config.BuyPendantsAnytime.Description": "Makes the old mariner sell Mermaid's Pendants at anytime.\nDefault: false",
+  "Config.PendantPrice.Name": "Mermaid Pendant's Price'",
+  "Config.PendantPrice.Description": "Change the amount of gold the mariner sells Mermaid's Pendants for.\nDefault: 5000",
+
+  "Config.Section.Divorce": "Divorrce",
+  "Config.PreventHostileDivorces.Name": "Prevent Hostile Divorces",
+  "Config.PreventHostileDivorces.Description": "Prevents Hostil Divorces.\nDefault: true",
+  "Config.ComplexDivorce.Name": "Buy Pendants Anytime",
+  "Config.ComplexDivorce.Description": "Makes the old mariner sell Mermaid's Pendants at anytime.",
+
+  "Config.Section.Children": "Children",
+  "Config.MaxChildren.Name": "Max Children",
+  "Config.MaxChildren.Description": "Sets the amount of children you can have.\nDefault: 2",
+  "Config.ShowParentNames.Name": "Show Parent Names",
+  "Config.ShowParentNames.Description": "Show's parent names next to children's names",
+
+  "Config.Section.Spouse": "Spouse",
+  "Config.PercentChanceForSpouseInBed.Name": "Bed Chance",
+  "Config.PercentChanceForSpouseInBed.Description": "The chance for each spouse to stay in bed on day start.\nDefault: 25",
+  "Config.PercentChanceForSpouseInKitchen.Name": "Kitchen Chance",
+  "Config.PercentChanceForSpouseInKitchen.Description": "The chance for each spouse to spawn in the kitchen on day start.\nDefault: 25",
+  "Config.PercentChanceForSpouseAtPatio.Name": "Patio Chance",
+  "Config.PercentChanceForSpouseAtPatio.Description": "The chance for each spouse to spawn in the spouse patio on day start.\nDefault: 25"
 }
