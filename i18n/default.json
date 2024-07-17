@@ -1,19 +1,22 @@
 {
   "PlayerMarriage.MarriedToNonPolyamorousNPC": "You or the farmer you are attempting to marry is currently married to a monogamous NPC.",
-  "NPCMarriage.MarriedToNonPolyamorousNPC": "You are currently married to a monogamous NPC.",
-  "NPCMarriage.IsNonPolyamorousNPC": "{0} is monogamous and you're already married to someone else.",
 
-  "Config.Section.Pendant":  "Mermaid's Pendant",
+  "Marriage.NonPolyamorousNPC": "My answer is no.#$b#Your partner wouldn't be alright with this.$3",
+  "Marriage.IsNonPolyamorousNPC": "I can't. I'm not polyamorous like you, and you're already married to someone else.$3",
+  "Dating.NonPolyamorousNPC": "Sorry, I'm not comfortable dating you right now...$3#$b#$SpouseName$ is monogamous, it just wouldn't be right.",
+  "Dating.IsNonPolyamorousNPC": "I can't accept this.$1#$b#I'm monogamous... and you're already taken.$3",
+
+  "Config.Section.Pendant": "Mermaid's Pendant",
   "Config.BuyPendantsAnytime.Name": "Buy Pendants Anytime",
   "Config.BuyPendantsAnytime.Description": "Makes the old mariner sell Mermaid's Pendants at anytime.\nDefault: false",
-  "Config.PendantPrice.Name": "Mermaid Pendant's Price'",
+  "Config.PendantPrice.Name": "Mermaid Pendant's Price",
   "Config.PendantPrice.Description": "Change the amount of gold the mariner sells Mermaid's Pendants for.\nDefault: 5000",
 
-  "Config.Section.Divorce": "Divorrce",
+  "Config.Section.Divorce": "Divorce",
   "Config.PreventHostileDivorces.Name": "Prevent Hostile Divorces",
   "Config.PreventHostileDivorces.Description": "Prevents Hostil Divorces.\nDefault: true",
-  "Config.ComplexDivorce.Name": "Buy Pendants Anytime",
-  "Config.ComplexDivorce.Description": "Makes the old mariner sell Mermaid's Pendants at anytime.",
+  "Config.ComplexDivorce.Name": "Complex Divorce",
+  "Config.ComplexDivorce.Description": "Adds an option to the divorce menu for more nuanced divorces.\nDefault: true",
 
   "Config.Section.Children": "Children",
   "Config.MaxChildren.Name": "Max Children",

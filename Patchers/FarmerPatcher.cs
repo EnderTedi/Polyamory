@@ -20,7 +20,7 @@ namespace Polyamory.Patchers
             helper = Helper;
             monitor = Monitor;
         }
-        
+
         public static class FarmerPatch_spouse
         {
             public static void Postfix(Farmer __instance, ref string __result)
@@ -196,9 +196,9 @@ namespace Polyamory.Patchers
                 try
                 {
 
-                    if (/*EventPatches.startingLoadActors && */Environment.StackTrace.Contains("command_loadActors") && !Environment.StackTrace.Contains("addActor") && !Environment.StackTrace.Contains("Dialogue") && !Environment.StackTrace.Contains("checkForSpecialCharacters") && /*Game1Patches.lastGotCharacter != null &&*/ __instance != null)
+                    if (EventPatcher.startingLoadActors && Environment.StackTrace.Contains("command_loadActors") && !Environment.StackTrace.Contains("addActor") && !Environment.StackTrace.Contains("Dialogue") && !Environment.StackTrace.Contains("checkForSpecialCharacters") && Game1Patcher.lastGotCharacter != null && __instance != null)
                     {
-                        //__result = Utility.getHomeOfFarmer(__instance)?.getChildren()?.FindAll(c => c.displayName.EndsWith($"({Game1Patches.lastGotCharacter})")) ?? new List<Child>();
+                        __result = Utility.getHomeOfFarmer(__instance)?.getChildren()?.FindAll(c => c.displayName.EndsWith($"({Game1Patcher.lastGotCharacter})")) ?? new List<Child>();
                         return false;
                     }
                 }

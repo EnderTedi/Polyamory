@@ -1,0 +1,6 @@
+Dialogue Keys:
+
+Dating_IsNonPolyamorousNPC
+Dating_NonPolyamorousNPC
+Marriage_IsNonPolyamorousNPC
+Marriage_NonPolyamorousNPC
