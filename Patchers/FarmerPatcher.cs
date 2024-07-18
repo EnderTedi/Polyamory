@@ -21,6 +21,7 @@ namespace Polyamory.Patchers
             monitor = Monitor;
         }
 
+        [HarmonyPatch(typeof(Farmer), "spouse", MethodType.Getter)]
         public static class FarmerPatch_spouse
         {
             public static void Postfix(Farmer __instance, ref string __result)

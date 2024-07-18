@@ -12,7 +12,7 @@
 	  <EnableHarmony>true</EnableHarmony>
 	  <UpdateKeys>Nexus:26081</UpdateKeys>
   </PropertyGroup>
-
+	
   <ItemGroup>
     <PackageReference Include="Leclair.Stardew.ModManifestBuilder" Version="2.3.1" />
     <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.1.1" />

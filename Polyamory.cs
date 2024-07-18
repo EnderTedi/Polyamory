@@ -52,16 +52,12 @@ namespace Polyamory
             Helper.Events.GameLoop.OneSecondUpdateTicked += OnOneSecondUpdateTicked;
 
             FarmerPatcher.Initialize(Helper, Monitor);
-            NPCPatcher.Initialize(Helper, Monitor);
+            NPCPatcher.Initialize(Helper, Monitor, Config);
             Game1Patcher.Initialize(Helper, Monitor);
             EventPatcher.Initialize(Helper, Monitor);
 
             var harmony = new Harmony(this.ModManifest.UniqueID);
             harmony.PatchAll(typeof(Polyamory).Assembly);
-            harmony.Patch(
-               original: AccessTools.PropertyGetter(typeof(Farmer), nameof(Farmer.spouse)),
-               postfix: new HarmonyMethod(typeof(FarmerPatcher.FarmerPatch_spouse), nameof(FarmerPatcher.FarmerPatch_spouse.Postfix))
-            );
             harmony.Patch(
                 original: AccessTools.GetDeclaredMethods(typeof(Game1)).Where(m => m.Name == "getCharacterFromName" && m.ReturnType == typeof(NPC)).First(),
                 prefix: new HarmonyMethod(typeof(Game1Patcher.Game1Patch_getCharacterFromName), nameof(Game1Patcher.Game1Patch_getCharacterFromName.Prefix))
