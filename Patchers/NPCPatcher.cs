@@ -11,6 +11,7 @@ using Color = Microsoft.Xna.Framework.Color;
 
 using Microsoft.Xna.Framework;
 using StardewValley.Characters;
+using System.Collections;
 
 namespace Polyamory.Patchers
 {
@@ -34,6 +35,15 @@ namespace Polyamory.Patchers
         {
             public static bool Prefix(NPC __instance, ref bool __result, ref string __state, Farmer who, bool probe = false)
             {
+                if (who.friendshipData.ContainsKey(__instance.Name) && who.getFriendshipHeartLevelForNPC(__instance.Name) >= 8 && (__instance.modData is null || !__instance.modData.ContainsKey(Game1.uniqueIDForThisGame.ToString() + "PolyData")))
+                {
+#pragma warning disable CS8602
+                    __instance.modData.Add(Game1.uniqueIDForThisGame.ToString() + "PolyData", "true");
+#pragma warning restore CS8602
+                    helper.GameContent.InvalidateCache("Characters\\Dialogue\\" + __instance.Name);
+                    helper.GameContent.Load<Dictionary<string, string>>("Characters\\Dialogue\\" + __instance.Name);
+                }
+
                 if (Game1.player.spouse != null && Game1.player.spouse != __instance.Name && Polyamory.GetSpouses(who, true).Count != 0 && Polyamory.GetSpouses(who, true).ContainsKey(__instance.Name))
                 {
                     __state = who.spouse;
@@ -391,30 +401,36 @@ namespace Polyamory.Patchers
         {
             internal static void Prefix(NPC __instance, ref string? __state)
             {
-                var dict = Game1.content.Load<Dictionary<string, NpcExtensionDataFacade>>("spacechase0.SpaceCore/NpcExtensionData");
-                if (dict.TryGetValue(__instance.Name, out var npcEntry) && npcEntry.IgnoreMarriageSchedule)
+                
+                try
                 {
-                    __state = null;
-                    if (Game1.player.spouse == __instance.Name)
+                    IDictionary npcExtData = Game1.content.Load<IDictionary>("spacechase0.SpaceCore/NpcExtensionData");
+                    if (npcExtData is not null && npcExtData.Contains($"{__instance.Name}") && Polyamory.GetSpouses(Game1.player, true).ContainsKey(__instance.Name))
+                    {
+                        var entry = npcExtData[__instance.Name] as dynamic;
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                        if (entry.IgnoreMarriageSchedule)
+                        {
+                            monitor.Log($"{__instance.Name}, {(bool)entry.IgnoreMarriageSchedule}", LogLevel.Alert);
+                            __state = null;
+                            if (Game1.player.spouse == __instance.Name)
+                            {
+                                __state = Game1.player.spouse;
+                                Game1.player.spouse = "";
+                                return;
+                            }
+                        }
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+                    }
+                    if (Polyamory.GetSpouses(Game1.player, false).ContainsKey(__instance.Name))
                     {
                         __state = Game1.player.spouse;
-                        Game1.player.spouse = "";
+                        Game1.player.spouse = __instance.Name;
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    try
-                    {
-                        if (Polyamory.GetSpouses(Game1.player, false).ContainsKey(__instance.Name))
-                        {
-                            __state = Game1.player.spouse;
-                            Game1.player.spouse = __instance.Name;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        monitor.Log($"Failed in {nameof(NPCPatch_loadCurrentDialogue)}:\n{ex}", LogLevel.Error);
-                    }
+                    monitor.Log($"Failed in {nameof(NPCPatch_loadCurrentDialogue)}:\n{ex}", LogLevel.Error);
                 }
             }
 
@@ -566,8 +582,10 @@ namespace Polyamory.Patchers
                     if (___isPlayingSleepingAnimation)
                         return true;
                     Dictionary<string, string> animationDescriptions = Game1.content.Load<Dictionary<string, string>>("Data\\animationDescriptions");
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                     if (animationDescriptions.TryGetValue(__instance.Name.ToLower() + "_sleep", out string sleepString) && !int.TryParse(sleepString.Split('/')[0], out int sleep_frame))
                         return false;
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 }
                 catch (Exception ex)
                 {
@@ -607,7 +625,7 @@ namespace Polyamory.Patchers
             {
                 try
                 {
-                    if (__instance.Name is null || __instance is not Child || !config.ShowParentNames || !__instance.modData.ContainsKey("aedenthorn.FreeLove/OtherParent"))
+                    if (__instance.Name is null || __instance is not Child || !config.ShowParentNames || !__instance.modData.ContainsKey("EnderTedi.Polyamory/OtherParent"))
                         return;
                     __result = $"{__result} ({__instance.modData["EnderTedi.Polyamory/OtherParent"]})";
                 }

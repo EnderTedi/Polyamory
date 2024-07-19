@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using StardewValley.Locations;
+using System.Collections;
 
 namespace Polyamory
 {
@@ -232,8 +233,17 @@ namespace Polyamory
 
             foreach (NPC spouse in allSpouses)
             {
-                if (spouse is null)
-                    continue;
+                IDictionary npcExtData = Game1.content.Load<IDictionary>("spacechase0.SpaceCore/NpcExtensionData");
+                if (npcExtData is not null && npcExtData.Contains($"{spouse}"))
+                {
+                    var entry = npcExtData[spouse.Name] as dynamic;
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                    if (entry.IgnoreMarriageSchedule)
+                    {
+                        continue;
+                    }
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+                }
                 if (!farmHouse.Equals(spouse.currentLocation))
                 {
                     monitor.Log($"{spouse.Name} is not in farm house ({spouse.currentLocation.Name})");

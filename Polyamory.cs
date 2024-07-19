@@ -2,6 +2,7 @@
 using Polyamory.Patchers;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.Menus;
 
 namespace Polyamory
 {
@@ -55,6 +56,7 @@ namespace Polyamory
             NPCPatcher.Initialize(Helper, Monitor, Config);
             Game1Patcher.Initialize(Helper, Monitor);
             EventPatcher.Initialize(Helper, Monitor);
+            Divorce.Initialize(Helper, Monitor, Config);
 
             var harmony = new Harmony(this.ModManifest.UniqueID);
             harmony.PatchAll(typeof(Polyamory).Assembly);
@@ -62,6 +64,10 @@ namespace Polyamory
                 original: AccessTools.GetDeclaredMethods(typeof(Game1)).Where(m => m.Name == "getCharacterFromName" && m.ReturnType == typeof(NPC)).First(),
                 prefix: new HarmonyMethod(typeof(Game1Patcher.Game1Patch_getCharacterFromName), nameof(Game1Patcher.Game1Patch_getCharacterFromName.Prefix))
                 );
+            harmony.Patch(
+               original: typeof(DialogueBox).GetConstructor(new Type[] { typeof(List<string>) }),
+               prefix: new HarmonyMethod(typeof(UIPatcher.DialogueBoxPatch_Constructor), nameof(UIPatcher.DialogueBoxPatch_Constructor.Prefix))
+            );
 
             Helper.ConsoleCommands.Add("Polyamory.IsNpcPolyamorous", "Returns whether the specified NPCs are polyamorous.\nAccepts internal NPC names or \"All\" for all npcs.", (cmd, args) =>
             {

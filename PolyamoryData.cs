@@ -9,10 +9,4 @@
         public string[]? PositiveChemistry { get; set; }
         public string[]? NegativeChemistry { get; set; }
     }
-
-    public class NpcExtensionDataFacade
-    {
-        public Dictionary<string, string> GiftEventTriggers = new();
-        public bool IgnoreMarriageSchedule { get; set; } = false;
-    }
 }
