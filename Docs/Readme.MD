@@ -87,7 +87,7 @@ Polyamory adds 2 additional Content Patcher Tokens:
 </tr>
 <tr>
 	<td> EnderTedi.Polyamory/IsDatingAnyone </td>
-	<td> Returns the string "true" if the player is dating anyone, else "false". It is not a boolean. </td>
+	<td> Returns true if the player is dating anyone, else false. </td>
 </tr>
 </table>
 
