@@ -96,12 +96,12 @@ Polyamory adds 2 additional Content Patcher Tokens:
 Polyamory provides an C# API:
 - `void PlaceSpousesInFarmhouse(FarmHouse farmHouse)` Places Spouses in the farmhouse.
 - `Dictionary<string, NPC> GetSpouses(Farmer farmer, bool all = true);` Returns spouses for the given farmer.
-- `public void SetLastPregnantSpouse(string name);` Sets the last spouse to be pregnant.
-- `public bool IsNpcPolyamorous(string npc);` Returns whether the specified npc is polyamorous.
-- `public List<string> PeopleDating(Farmer farmer);` Returns a list with the names of all the NPCs the specified farmer is dating.
-- `public bool IsValidEngagement(Farmer farmer, string npc);` Returns whether the specified farmer can get engaged to the specified NPC.
-- `public bool IsValidDating(Farmer farmer, string npc);` Returns whether the specified farmer can date the specified NPC.
-- `public bool HasChemistry(Farmer farmer, string npc);` Returns whether the specified farmer's current partners have chemistry with the specified NPC.
+- `void SetLastPregnantSpouse(string name);` Sets the last spouse to be pregnant.
+- `bool IsNpcPolyamorous(string npc);` Returns whether the specified npc is polyamorous.
+- `List<string> PeopleDating(Farmer farmer);` Returns a list with the names of all the NPCs the specified farmer is dating.
+- `bool IsValidEngagement(Farmer farmer, string npc);` Returns whether the specified farmer can get engaged to the specified NPC.
+- `bool IsValidDating(Farmer farmer, string npc);` Returns whether the specified farmer can date the specified NPC.
+- `bool HasChemistry(Farmer farmer, string npc);` Returns whether the specified farmer's current partners have chemistry with the specified NPC.
 
 ## See Also
 * [Nexus](https://www.nexusmods.com/stardewvalley/mods/26081)
