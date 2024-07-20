@@ -95,7 +95,7 @@ namespace Polyamory
                             if (!IsNpcPolyamorous(npc) && !IsValidDating(Game1.player, npc))
                             {
                                 data.Remove("RejectItem_(O)458");
-                                if (data.ContainsKey("CantDate_IsNonPolyamorousNPC"))
+                                if (data.ContainsKey("CantDate_IsMonogamousNPC"))
                                 {
                                     data.Add("RejectItem_(O)458", data["Dating_IsNonPolyamorousNPC"]);
                                 }
@@ -111,7 +111,7 @@ namespace Polyamory
                                     if (data.ContainsKey("CantDate_DatingNonPolyamorousNPC"))
                                     {
                                         monitor.Log($"trying to give {npc} ");
-                                        data.Add("RejectItem_(O)458", data["CantDating_DatingNonPolyamorousNPC"]);
+                                        data.Add("RejectItem_(O)458", data["CantDating_DatingMonogamousNPC"]);
                                     }
                                     else
                                     {

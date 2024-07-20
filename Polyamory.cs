@@ -170,10 +170,6 @@ namespace Polyamory
         {
             return Polyamory.GetSpouses(farmer, all);
         }
-        public Dictionary<string, NPC> GetSpouses(Farmer farmer, int all = -1)
-        {
-            return Polyamory.GetSpouses(farmer, all != 0);
-        }
         public void SetLastPregnantSpouse(string name)
         {
             Pregnancy.lastPregnantSpouse = Game1.getCharacterFromName(name);
@@ -181,6 +177,22 @@ namespace Polyamory
         public bool IsNpcPolyamorous(string npc)
         {
             return Polyamory.IsNpcPolyamorous(npc);
+        }
+        public List<string> PeopleDating(Farmer farmer)
+        {
+            return Polyamory.PeopleDating(farmer);
+        }
+        public bool IsValidEngagement(Farmer farmer, string npc)
+        {
+            return Polyamory.IsValidEngagement(farmer, npc);
+        }
+        public bool IsValidDating(Farmer farmer, string npc)
+        {
+            return Polyamory.IsValidDating(farmer, npc);
+        }
+        public bool HasChemistry(Farmer farmer, string npc)
+        {
+            return Polyamory.HasChemistry(farmer, npc);
         }
     }
 }

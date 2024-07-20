@@ -1,6 +1,0 @@
-Dialogue Keys:
-
-CantMarry_MarriedMonogamousNPC
-CantMarry_IsMonogamousNPC
-CantDate_DatingNonPolyamorousNPC
-CantDate_IsNonPolyamorousNPC

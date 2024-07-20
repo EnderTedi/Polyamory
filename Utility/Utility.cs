@@ -77,6 +77,7 @@ namespace Polyamory
                 return true;
             foreach (string partner in dating)
             {
+                if (HasChemistry(farmer, partner))
                 if (!IsNpcPolyamorous(partner))
                 {
                     return false;
@@ -101,8 +102,8 @@ namespace Polyamory
             Dictionary<string, PolyamoryData>? data = helper.GameContent.Load<Dictionary<string, PolyamoryData>>($"{modid}/PolyamoryData");
             data.TryGetValue(npc, out PolyamoryData? npcData);
 
-            var spouses = GetSpouses(farmer, true);
-            foreach (string spouse in spouses.Keys)
+            var spouses = PeopleDating(farmer);
+            foreach (string spouse in spouses)
             {
                 if (npcData is not null)
                 {
