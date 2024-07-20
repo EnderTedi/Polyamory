@@ -34,16 +34,16 @@ Polyamory Data is located in the `EnderTedi.Polyamory/Data` asset. It is a Dicto
 	<th> Description </th>
 </tr>
 <tr>
-	<td> `IsPolyamorous` </td>
-	<td> _(Optional)_ Dictates if the NPC is Polyamorous `(true)` or Monogamous `(false)`. Default `true`. </td>
+	<td> IsPolyamorous </td>
+	<td> (Optional) Dictates if the NPC is Polyamorous (true) or Monogamous (false). Default true. </td>
 </tr>
 <tr>
-	<td> `PositiveChemistry` </td>
-	<td> _(Optional)_ A list of NPC Internal Names. If the field is not null the NPC will refuse to date and marry the player if dating anyone not on the list. Has the opposite effect compared to `NegativeChemistry`. Default `null`</td>
+	<td> PositiveChemistry </td>
+	<td> (Optional) A list of NPC Internal Names. If the field is not null the NPC will refuse to date and marry the player if dating anyone not on the list. Has the opposite effect compared to NegativeChemistry. Default null</td>
 </tr>
 <tr>
-	<td> `NegativeChemistry` </td>
-	<td> _(Optional)_ A list of NPC Internal Names. If the field is not null the NPC will refuse to date and marry the player if dating anyone on the list. Has the opposite effect compared to `PositiveChemistry`. Default `null`</td>
+	<td> NegativeChemistry </td>
+	<td> (Optional) A list of NPC Internal Names. If the field is not null the NPC will refuse to date and marry the player if dating anyone on the list. Has the opposite effect compared to PositiveChemistry. Default null</td>
 </tr>
 </table>
 
@@ -57,19 +57,19 @@ Polyamory adds 4 additional Dialogue Keys located in the `Characters\\Dialogue\\
 	<th> Description </th>
 </tr>
 <tr>
-	<td> `CantDate_DatingMonogamousNPC` </td>
+	<td> CantDate_DatingMonogamousNPC </td>
 	<td> Triggers when the player tries to give a bouquet to an NPC when already dating or being married to a Monogamous NPC. </td>
 </tr>
 <tr>
-	<td> `CantDate_IsMonogamousNPC` </td>
+	<td> CantDate_IsMonogamousNPC </td>
 	<td> Triggers when the player tries to give a bouquet to a Monogamous NPC when already dating or being married to other NPC(s). </td>
 </tr>
 <tr>
-	<td> `CantMarry_MarriedMonogamousNPC` </td>
+	<td> CantMarry_MarriedMonogamousNPC </td>
 	<td> Triggers when the player tries to give a mermaid's pendant to an NPC when already dating or being married to a Monogamous NPC. </td>
 </tr>
 <tr>
-	<td> `CantMarry_IsMonogamousNPC` </td>
+	<td> CantMarry_IsMonogamousNPC </td>
 	<td> Triggers when the player tries to give a mermaid's pendant to a Monogamous NPC when already dating or being married to other NPC(s). </td>
 </tr>
 </table>
@@ -84,12 +84,12 @@ Polyamory adds 2 additional Content Patcher Tokens:
 	<th> Description </th>
 </tr>
 <tr>
-	<td> `EnderTedi.Polyamory/PlayerSpouses` </td>
+	<td> EnderTedi.Polyamory/PlayerSpouses </td>
 	<td> Exports a list of all the spouses for the player. </td>
 </tr>
 <tr>
-	<td> `EnderTedi.Polyamory/IsDatingAnyone` </td>
-	<td> Returns the string `"true"` if the player is dating anyone. </td>
+	<td> EnderTedi.Polyamory/IsDatingAnyone </td>
+	<td> Returns the string "true" if the player is dating anyone, else "false". It is not a boolean. </td>
 </tr>
 </table>
 
@@ -106,5 +106,5 @@ Polyamory provides an C# API:
 - `public bool HasChemistry(Farmer farmer, string npc);` Returns whether the specified farmer's current partners have chemistry with the specified NPC.
 
 ## See Also
-[Nexus](https://www.nexusmods.com/stardewvalley/mods/26081)
-[Changelog](Changelog.MD)
+* [Nexus](https://www.nexusmods.com/stardewvalley/mods/26081)
+* [Changelog](Changelog.MD)
