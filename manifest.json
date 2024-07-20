@@ -15,6 +15,12 @@
   "MinimumApiVersion": "4.0.0",
   "MinimumGameVersion": "1.6.0",
   "EntryDll": "Polyamory.dll",
+  "Dependencies": [
+    {
+      "UniqueID": "pathoschild.ContentPatcher",
+      "IsRequired": false
+    }
+  ],
   "UpdateKeys": [
     "Nexus:26081"
   ]

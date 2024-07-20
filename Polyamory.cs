@@ -2,7 +2,10 @@
 using Polyamory.Patchers;
 using StardewModdingAPI;
 using StardewValley;
+using StardewValley.Locations;
 using StardewValley.Menus;
+using StardewValley.Pathfinding;
+using Point = Microsoft.Xna.Framework.Point;
 
 namespace Polyamory
 {
@@ -52,11 +55,15 @@ namespace Polyamory
             Helper.Events.GameLoop.DayStarted += OnDayStarted;
             Helper.Events.GameLoop.OneSecondUpdateTicked += OnOneSecondUpdateTicked;
 
-            FarmerPatcher.Initialize(Helper, Monitor);
-            NPCPatcher.Initialize(Helper, Monitor, Config);
-            Game1Patcher.Initialize(Helper, Monitor);
-            EventPatcher.Initialize(Helper, Monitor);
             Divorce.Initialize(Helper, Monitor, Config);
+            EventPatcher.Initialize(Helper, Monitor);
+            FarmerPatcher.Initialize(Helper, Monitor);
+            Game1Patcher.Initialize(Helper, Monitor);
+            LocationPatcher.Initialize(Helper, Monitor, Config);
+            NPCPatcher.Initialize(Helper, Monitor, Config);
+            PathFindControllerPatcher.Initialize(Helper, Monitor, Config);
+            Pregnancy.Initialize(Monitor, Config);
+            UIPatcher.Initialize(Helper, Monitor);
 
             var harmony = new Harmony(this.ModManifest.UniqueID);
             harmony.PatchAll(typeof(Polyamory).Assembly);
@@ -67,6 +74,22 @@ namespace Polyamory
             harmony.Patch(
                original: typeof(DialogueBox).GetConstructor(new Type[] { typeof(List<string>) }),
                prefix: new HarmonyMethod(typeof(UIPatcher.DialogueBoxPatch_Constructor), nameof(UIPatcher.DialogueBoxPatch_Constructor.Prefix))
+            );
+            harmony.Patch(
+               original: AccessTools.Constructor(typeof(PathFindController), new Type[] { typeof(Character), typeof(GameLocation), typeof(Point), typeof(int), typeof(bool) }),
+               prefix: new HarmonyMethod(typeof(PathFindControllerPatcher), nameof(PathFindControllerPatcher.PathFindController_Prefix))
+            );
+            harmony.Patch(
+               original: AccessTools.Constructor(typeof(PathFindController), new Type[] { typeof(Character), typeof(GameLocation), typeof(Point), typeof(int), typeof(PathFindController.endBehavior) }),
+               prefix: new HarmonyMethod(typeof(PathFindControllerPatcher), nameof(PathFindControllerPatcher.PathFindController_Prefix))
+            );
+            harmony.Patch(
+               original: AccessTools.Constructor(typeof(PathFindController), new Type[] { typeof(Character), typeof(GameLocation), typeof(Point), typeof(int), typeof(PathFindController.endBehavior), typeof(int) }),
+               prefix: new HarmonyMethod(typeof(PathFindControllerPatcher), nameof(PathFindControllerPatcher.PathFindController_Prefix))
+            );
+            harmony.Patch(
+               original: AccessTools.Constructor(typeof(PathFindController), new Type[] { typeof(Character), typeof(GameLocation), typeof(Point), typeof(int) }),
+               prefix: new HarmonyMethod(typeof(PathFindControllerPatcher), nameof(PathFindControllerPatcher.PathFindController_Prefix))
             );
 
             Helper.ConsoleCommands.Add("Polyamory.IsNpcPolyamorous", "Returns whether the specified NPCs are polyamorous.\nAccepts internal NPC names or \"All\" for all npcs.", (cmd, args) =>
@@ -128,6 +151,35 @@ namespace Polyamory
                 }
                 monitor.Log($"{HasChemistry(Game1.player, args[0])}", LogLevel.Info);
             });
+        }
+
+        public override object? GetApi()
+        {
+            return new PolyamoryAPI();
+        }
+    }
+
+    public class PolyamoryAPI : IPolyamoryAPI
+    {
+        public void PlaceSpousesInFarmhouse(FarmHouse farmHouse)
+        {
+            Polyamory.PlaceSpousesInFarmhouse(farmHouse);
+        }
+        public Dictionary<string, NPC> GetSpouses(Farmer farmer, bool all = true)
+        {
+            return Polyamory.GetSpouses(farmer, all);
+        }
+        public Dictionary<string, NPC> GetSpouses(Farmer farmer, int all = -1)
+        {
+            return Polyamory.GetSpouses(farmer, all != 0);
+        }
+        public void SetLastPregnantSpouse(string name)
+        {
+            Pregnancy.lastPregnantSpouse = Game1.getCharacterFromName(name);
+        }
+        public bool IsNpcPolyamorous(string npc)
+        {
+            return Polyamory.IsNpcPolyamorous(npc);
         }
     }
 }

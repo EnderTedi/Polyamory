@@ -364,6 +364,35 @@ namespace Polyamory
             return new Vector2(bedStart.X * 64 + x, bedStart.Y * 64 + bedSleepOffset - (GetTopOfHeadSleepOffset(name) * 4));
         }
 
+        private static bool IsTileOccupied(GameLocation location, Point tileLocation, string characterToIgnore)
+        {
+            Rectangle tileLocationRect = new(tileLocation.X * 64 + 1, tileLocation.Y * 64 + 1, 62, 62);
+
+            for (int i = 0; i < location.characters.Count; i++)
+            {
+                if (location.characters[i] != null && !location.characters[i].Name.Equals(characterToIgnore) && location.characters[i].GetBoundingBox().Intersects(tileLocationRect))
+                {
+                    monitor.Log($"Tile {tileLocation} is occupied by {location.characters[i].Name}");
+
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static Point GetSpouseBedEndPoint(FarmHouse fh, string name)
+        {
+            var bedSpouses = GetBedSpouses(fh);
+
+            Point bedStart = fh.GetSpouseBed().GetBedSpot();
+            int bedWidth = GetBedWidth();
+
+            int x = (int)(bedSpouses.IndexOf(name) / (float)(bedSpouses.Count) * (bedWidth - 1));
+            if (x < 0)
+                return Point.Zero;
+            return new Point(bedStart.X + x, bedStart.Y);
+        }
+
         public static int GetTopOfHeadSleepOffset(string name)
         {
             if (topOfHeadOffsets.ContainsKey(name))
@@ -436,6 +465,7 @@ namespace Polyamory
                 (list[n], list[k]) = (list[k], list[n]);
             }
         }
+
 #pragma warning disable CS8714
         public static void ShuffleDic<T1, T2>(ref Dictionary<T1, T2> list)
         {

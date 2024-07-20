@@ -8,22 +8,20 @@ using StardewValley.Events;
 using StardewValley.Locations;
 using StardewValley.Menus;
 
-namespace Polyamory
+namespace Polyamory.Patchers
 {
     internal class Pregnancy
     {
 
 #pragma warning disable CS8618
-        private static IModHelper helper;
         private static IMonitor monitor;
         private static ModConfig config;
 #pragma warning restore CS8618
         public static NPC? lastPregnantSpouse;
         public static NPC? lastBirthingSpouse;
 
-        internal static void Initialize(IModHelper Helper, IMonitor Monitor, ModConfig Config)
+        internal static void Initialize(IMonitor Monitor, ModConfig Config)
         {
-            helper = Helper;
             monitor = Monitor;
             config = Config;
         }
@@ -99,7 +97,7 @@ namespace Polyamory
                     //int maxChildren = childrenAPI == null ? config.MaxChildren : childrenAPI.GetMaxChildren();
                     int maxChildren = config.MaxChildren;
                     FarmHouse fh = Utility.getHomeOfFarmer(f);
-                    bool can = spouse.daysAfterLastBirth <= 0 && fh.cribStyle.Value > 0 && fh.upgradeLevel >= 2 && friendship.DaysUntilBirthing < 0 && heartsWithSpouse >= 10 && friendship.DaysMarried >= 7 && (kids.Count < maxChildren);
+                    bool can = spouse.daysAfterLastBirth <= 0 && fh.cribStyle.Value > 0 && fh.upgradeLevel >= 2 && friendship.DaysUntilBirthing < 0 && heartsWithSpouse >= 10 && friendship.DaysMarried >= 7 && kids.Count < maxChildren;
                     monitor.Log($"Checking ability to get pregnant: {spouse.Name} {can}:{(fh.cribStyle.Value > 0 ? $" no crib" : "")}{(Utility.getHomeOfFarmer(f).upgradeLevel < 2 ? $" house level too low {Utility.getHomeOfFarmer(f).upgradeLevel}" : "")}{(friendship.DaysMarried < 7 ? $", not married long enough {friendship.DaysMarried}" : "")}{(friendship.DaysUntilBirthing >= 0 ? $", already pregnant (gives birth in: {friendship.DaysUntilBirthing})" : "")}");
                     if (can && Game1.player.currentLocation == Game1.getLocationFromName(Game1.player.homeLocation.Value) && Polyamory.random.NextDouble() < 0.05)
                     {
@@ -167,9 +165,9 @@ namespace Polyamory
                 if (___babyName != null && ___babyName != "" && ___babyName.Length > 0)
                 {
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-                    double chance = (lastBirthingSpouse.Name.Equals("Maru") || lastBirthingSpouse.Name.Equals("Krobus")) ? 0.5 : 0.0;
+                    double chance = lastBirthingSpouse.Name.Equals("Maru") || lastBirthingSpouse.Name.Equals("Krobus") ? 0.5 : 0.0;
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
-                    chance += (Game1.player.hasDarkSkin() ? 0.5 : 0.0);
+                    chance += Game1.player.hasDarkSkin() ? 0.5 : 0.0;
                     bool isDarkSkinned = new Random((int)Game1.uniqueIDForThisGame + (int)Game1.stats.DaysPlayed).NextDouble() < chance;
                     string newBabyName = ___babyName;
                     List<NPC> all_characters = Utility.getAllCharacters();

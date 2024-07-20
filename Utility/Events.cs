@@ -4,6 +4,8 @@ using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
+using ContentPatcher;
+using GenericModConfigMenu;
 
 namespace Polyamory
 {
@@ -80,6 +82,7 @@ namespace Polyamory
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
         {
             var GMCM = helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
+            var contentPatcher = helper.ModRegistry.GetApi<IContentPatcherAPI>("Pathoschild.ContentPatcher");
 
             if (GMCM is not null)
             {
@@ -195,6 +198,39 @@ namespace Polyamory
                     setValue: value => Config.PercentChanceForSpouseAtPatio = value
                     );
             }
+
+#pragma warning disable IDE0031 // Use null propagation
+            if (contentPatcher is not null)
+            {
+                contentPatcher.RegisterToken(ModManifest, "PlayerSpouses", () =>
+                {
+                    Farmer player;
+
+                    if (Context.IsWorldReady)
+                        player = Game1.player;
+                    else if (SaveGame.loaded?.player != null)
+                        player = SaveGame.loaded.player;
+                    else
+                        return null;
+
+                    var spouses = GetSpouses(player, true).Keys.ToList();
+                    spouses.Sort(delegate (string a, string b) {
+                        player.friendshipData.TryGetValue(a, out Friendship af);
+                        player.friendshipData.TryGetValue(b, out Friendship bf);
+                        if (af == null && bf == null)
+                            return 0;
+                        if (af == null)
+                            return -1;
+                        if (bf == null)
+                            return 1;
+                        if (af.WeddingDate == bf.WeddingDate)
+                            return 0;
+                        return af.WeddingDate > bf.WeddingDate ? -1 : 1;
+                    });
+                    return spouses.ToArray();
+                });
+            }
+#pragma warning restore IDE0031 // Use null propagation
         }
 
         private void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)
