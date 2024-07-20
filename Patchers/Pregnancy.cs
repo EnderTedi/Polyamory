@@ -196,7 +196,7 @@ namespace Polyamory.Patchers
                         Age = 0,
                         Position = new Vector2(16f, 4f) * 64f + new Vector2(0f + Polyamory.random.Next(-64, 48), -24f + Polyamory.random.Next(-24, 24)),
                     };
-                    baby.modData["aedenthorn.FreeLove/OtherParent"] = lastBirthingSpouse.Name;
+                    baby.modData["EnderTedi.Polyamory/OtherParent"] = lastBirthingSpouse.Name;
 
                     Utility.getHomeOfFarmer(Game1.player).characters.Add(baby);
                     Game1.playSound("smallSelect");

@@ -64,6 +64,7 @@ namespace Polyamory
             PathFindControllerPatcher.Initialize(Helper, Monitor, Config);
             Pregnancy.Initialize(Monitor, Config);
             UIPatcher.Initialize(Helper, Monitor);
+            ModAPIs.Initialize(Helper, Monitor, Config, this);
 
             var harmony = new Harmony(this.ModManifest.UniqueID);
             harmony.PatchAll(typeof(Polyamory).Assembly);

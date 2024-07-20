@@ -1,11 +1,8 @@
-﻿using HarmonyLib;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewValley;
 using StardewValley.Locations;
-using ContentPatcher;
-using GenericModConfigMenu;
 
 namespace Polyamory
 {
@@ -28,18 +25,66 @@ namespace Polyamory
                     data.Add("Marriage_IsNonPolyamorousNPC", I18n.Marriage_IsNonPolyamorousNPC());
                 });
             }
+
+            if (e.NameWithoutLocale.IsEquivalentTo("Data\\Events\\HaleyHouse"))
+            {
+                e.Edit(asset =>
+                {
+                    var data = asset.AsDictionary<string, string>().Data;
+                    foreach (string key in data.Keys)
+                    {
+                        if (key.StartsWith("195019") || key.StartsWith("195012"))
+                        {
+                            data.Remove(key);
+                        }
+                    }
+                });
+            }
+
+            if (e.NameWithoutLocale.IsEquivalentTo("Data\\Events\\Saloon"))
+            {
+                e.Edit(asset =>
+                {
+                    var data = asset.AsDictionary<string, string>().Data;
+                    foreach (string key in data.Keys)
+                    {
+                        if (key.StartsWith("195099") || key.StartsWith("195013"))
+                        {
+                            data.Remove(key);
+                        }
+                    }
+                });
+            }
+
+            if (e.NameWithoutLocale.IsEquivalentTo("Strings\\Locations"))
+            {
+                e.Edit(asset =>
+                {
+                    var data = asset.AsDictionary<string, string>().Data;
+                    string key = "Beach_Mariner_PlayerBuyItem_AnswerYes";
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+                    if (data.TryGetValue(key, out string value))
+                    {
+                        string newValue = value.ToString().Replace("5000", Config.PendantPrice.ToString());
+                        data[key] = newValue;
+                    }
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+                });
+            }
         }
 
         [EventPriority(EventPriority.Low)]
-        private void OnAssetRequested2(object? sender, AssetRequestedEventArgs e)
+        private void OnAssetRequested2(object? ender, AssetRequestedEventArgs e)
         {
             if (Context.IsWorldReady && Game1.player is not null)
             {
                 foreach (string npc in Game1.characterData.Keys)
                 {
-                    if (Game1.getCharacterFromName(npc) is null) continue;
-                    if (!Game1.player.friendshipData.TryGetValue(npc, out var _)) continue;
-                    if (!Game1.getCharacterFromName(npc, true).datable.Value) continue;
+                    if (Game1.player.spouse is null) break;
+                    if (Game1.getCharacterFromName(npc) is null
+                        || !Game1.player.friendshipData.TryGetValue(npc, out var _)
+                        || !Game1.getCharacterFromName(npc, true).datable.Value
+                        || Game1.player.getFriendshipHeartLevelForNPC(npc) < 8) continue;
 
                     if (e.NameWithoutLocale.IsEquivalentTo("Characters\\Dialogue\\" + npc))
                     {
@@ -47,24 +92,10 @@ namespace Polyamory
                         e.Edit(asset =>
                         {
                             var data = asset.AsDictionary<string, string>().Data;
-                            if (!IsNpcPolyamorous(Game1.player.spouse) && Game1.player.spouse != npc)
+                            if (!IsNpcPolyamorous(npc) && !IsValidDating(Game1.player, npc))
                             {
                                 data.Remove("RejectItem_(O)458");
-                                if (data.Any())
-                                if (data.ContainsKey("Dating_NonPolyamorousNPC"))
-                                {
-                                    monitor.Log($"trying to give {npc} ");
-                                    data.Add("RejectItem_(O)458", data["Dating_NonPolyamorousNPC"].ToString());
-                                }
-                                else
-                                {
-                                    data.Add("RejectItem_(O)458", I18n.Dating_NonPolyamorousNPC().Replace("$SpouseName$", Game1.getCharacterFromName(Game1.player.spouse).displayName, StringComparison.OrdinalIgnoreCase));
-                                }
-                            }
-                            else if (!IsNpcPolyamorous(npc) && IsDatingOtherPeople(Game1.player, npc) && Game1.player.spouse != npc)
-                            {
-                                data.Remove("RejectItem_(O)458");
-                                if (data.ContainsKey("Dating_IsNonPolyamorousNPC"))
+                                if (data.ContainsKey("CantDate_IsNonPolyamorousNPC"))
                                 {
                                     data.Add("RejectItem_(O)458", data["Dating_IsNonPolyamorousNPC"]);
                                 }
@@ -73,7 +104,21 @@ namespace Polyamory
                                     data.Add("RejectItem_(O)458", I18n.Dating_IsNonPolyamorousNPC());
                                 }
                             }
-                        });
+                            else if (!IsValidDating(Game1.player, npc))
+                            {
+                                data.Remove("RejectItem_(O)458");
+                                if (data.Any())
+                                    if (data.ContainsKey("CantDate_DatingNonPolyamorousNPC"))
+                                    {
+                                        monitor.Log($"trying to give {npc} ");
+                                        data.Add("RejectItem_(O)458", data["CantDating_DatingNonPolyamorousNPC"]);
+                                    }
+                                    else
+                                    {
+                                        data.Add("RejectItem_(O)458", I18n.Dating_NonPolyamorousNPC().Replace("$SpouseName$", Game1.getCharacterFromName(Game1.player.spouse).displayName, StringComparison.OrdinalIgnoreCase));
+                                    }
+                            }
+                        }, AssetEditPriority.Late + 1);
                     }
                 }
             }
@@ -81,156 +126,7 @@ namespace Polyamory
 
         private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
         {
-            var GMCM = helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
-            var contentPatcher = helper.ModRegistry.GetApi<IContentPatcherAPI>("Pathoschild.ContentPatcher");
-
-            if (GMCM is not null)
-            {
-                GMCM.Register(
-                    mod: ModManifest,
-                    reset: () => Config = new ModConfig(),
-                    save: () => Helper.WriteConfig(Config)
-                );
-
-                GMCM.AddSectionTitle(
-                    mod: ModManifest,
-                    text: () => I18n.Config_Section_Pendant());
-
-                GMCM.AddBoolOption(
-                    mod: ModManifest,
-                    name: () => I18n.Config_BuyPendantsAnytime_Name(),
-                    tooltip: () => I18n.Config_BuyPendantsAnytime_Description(),
-                    getValue: () => Config.BuyPendantsAnytime,
-                    setValue: value => Config.BuyPendantsAnytime = value
-                    );
-
-                GMCM.AddNumberOption(
-                    mod: ModManifest,
-                    name: () => I18n.Config_PendantPrice_Name(),
-                    tooltip: () => I18n.Config_PendantPrice_Description(),
-                    getValue: () => Config.PendantPrice,
-                    setValue: value => Config.PendantPrice = value,
-                    min: 0
-                    );
-
-                GMCM.AddParagraph(
-                    mod: ModManifest,
-                    text: () => "\n"
-                    );
-
-                GMCM.AddSectionTitle(
-                    mod: ModManifest,
-                    text: () => I18n.Config_Section_Divorce());
-
-                GMCM.AddBoolOption(
-                    mod: ModManifest,
-                    name: () => I18n.Config_PreventHostileDivorces_Name(),
-                    tooltip: () => I18n.Config_PreventHostileDivorces_Description(),
-                    getValue: () => Config.PreventHostileDivorces,
-                    setValue: value => Config.PreventHostileDivorces = value
-                    );
-
-                GMCM.AddBoolOption(
-                    mod: ModManifest,
-                    name: () => I18n.Config_ComplexDivorce_Name(),
-                    tooltip: () => I18n.Config_ComplexDivorce_Description(),
-                    getValue: () => Config.ComplexDivorce,
-                    setValue: value => Config.ComplexDivorce = value
-                    );
-
-                GMCM.AddParagraph(
-                    mod: ModManifest,
-                    text: () => "\n"
-                    );
-
-                GMCM.AddSectionTitle(
-                    mod: ModManifest,
-                    text: () => I18n.Config_Section_Children()
-                    );
-
-                GMCM.AddNumberOption(
-                    mod: ModManifest,
-                    name: () => I18n.Config_MaxChildren_Name(),
-                    tooltip: () => I18n.Config_MaxChildren_Description(),
-                    getValue: () => Config.MaxChildren,
-                    setValue: value => Config.MaxChildren = value
-                    );
-
-                GMCM.AddBoolOption(
-                    mod: ModManifest,
-                    name: () => I18n.Config_ShowParentNames_Name(),
-                    tooltip: () => I18n.Config_ShowParentNames_Description(),
-                    getValue: () => Config.ShowParentNames,
-                    setValue: value => Config.ShowParentNames = value
-                    );
-
-                GMCM.AddParagraph(
-                    mod: ModManifest,
-                    text: () => "\n"
-                    );
-
-                GMCM.AddSectionTitle(
-                    mod: ModManifest,
-                    text: () => I18n.Config_Section_Spouse()
-                    );
-
-                GMCM.AddNumberOption(
-                    mod: ModManifest,
-                    name: () => I18n.Config_PercentChanceForSpouseInBed_Name(),
-                    tooltip: () => I18n.Config_PercentChanceForSpouseInBed_Description(),
-                    getValue: () => Config.PercentChanceForSpouseInBed,
-                    setValue: value => Config.PercentChanceForSpouseInBed = value
-                    );
-
-                GMCM.AddNumberOption(
-                    mod: ModManifest,
-                    name: () => I18n.Config_PercentChanceForSpouseInKitchen_Name(),
-                    tooltip: () => I18n.Config_PercentChanceForSpouseInKitchen_Description(),
-                    getValue: () => Config.PercentChanceForSpouseInKitchen,
-                    setValue: value => Config.PercentChanceForSpouseInKitchen = value
-                    );
-
-                GMCM.AddNumberOption(
-                    mod: ModManifest,
-                    name: () => I18n.Config_PercentChanceForSpouseAtPatio_Name(),
-                    tooltip: () => I18n.Config_PercentChanceForSpouseAtPatio_Description(),
-                    getValue: () => Config.PercentChanceForSpouseAtPatio,
-                    setValue: value => Config.PercentChanceForSpouseAtPatio = value
-                    );
-            }
-
-#pragma warning disable IDE0031 // Use null propagation
-            if (contentPatcher is not null)
-            {
-                contentPatcher.RegisterToken(ModManifest, "PlayerSpouses", () =>
-                {
-                    Farmer player;
-
-                    if (Context.IsWorldReady)
-                        player = Game1.player;
-                    else if (SaveGame.loaded?.player != null)
-                        player = SaveGame.loaded.player;
-                    else
-                        return null;
-
-                    var spouses = GetSpouses(player, true).Keys.ToList();
-                    spouses.Sort(delegate (string a, string b) {
-                        player.friendshipData.TryGetValue(a, out Friendship af);
-                        player.friendshipData.TryGetValue(b, out Friendship bf);
-                        if (af == null && bf == null)
-                            return 0;
-                        if (af == null)
-                            return -1;
-                        if (bf == null)
-                            return 1;
-                        if (af.WeddingDate == bf.WeddingDate)
-                            return 0;
-                        return af.WeddingDate > bf.WeddingDate ? -1 : 1;
-                    });
-                    return spouses.ToArray();
-                });
-            }
-#pragma warning restore IDE0031 // Use null propagation
+            ModAPIs.LoadAPIs();
         }
 
         private void OnReturnedToTitle(object? sender, ReturnedToTitleEventArgs e)

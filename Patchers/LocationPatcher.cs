@@ -109,6 +109,8 @@ namespace Polyamory.Patchers
                         }
                         else if (who.hasAFriendWithHeartLevel(10, true))
                         {
+                            helper.GameContent.InvalidateCache("Strings\\Locations");
+                            helper.GameContent.Load<Dictionary<string, string>>("Strings\\Locations");
                             Response[] answers = new Response[]
                             {
                             new("Buy", Game1.content.LoadString("Strings\\Locations:Beach_Mariner_PlayerBuyItem_AnswerYes")),
@@ -189,7 +191,7 @@ namespace Polyamory.Patchers
         [HarmonyPatch(typeof(ManorHouse), nameof(ManorHouse.performAction))]
         public static class ManorHousePatch_performAction
         {
-            public static bool Prefix(ManorHouse __instance, string action, Farmer who, ref bool __result)
+            public static bool Prefix(ManorHouse __instance, string[] action, Farmer who, ref bool __result)
             {
                 try
                 {
@@ -197,23 +199,20 @@ namespace Polyamory.Patchers
                     Dictionary<string, NPC> spouses = Polyamory.GetSpouses(who, true);
                     if (action != null && who.IsLocalPlayer && !Game1.player.divorceTonight.Value && (Game1.player.isMarriedOrRoommates() || spouses.Count > 0))
                     {
-                        string a = action.Split(new char[]
+                        switch (ArgUtility.Get(action, 0))
                         {
-                    ' '
-                        })[0];
-                        if (a == "DivorceBook")
-                        {
-                            string str = helper.Translation.Get("divorce_who");
-                            List<Response> responses = new();
-                            foreach (NPC spouse in spouses.Values)
-                            {
-                                responses.Add(new Response(spouse.Name, spouse.displayName));
-                            }
-                            responses.Add(new Response("No", Game1.content.LoadString("Strings\\Lexicon:QuestionDialogue_No")));
-                            __instance.createQuestionDialogue(str, responses.ToArray(), "freelovedivorce");
-                            //__instance.createQuestionDialogue(s2, responses.ToArray(), "divorce");
-                            __result = true;
-                            return false;
+                            case "DivorceBook":
+                                string str = helper.Translation.Get("divorce_who");
+                                List<Response> responses = new();
+                                foreach (NPC spouse in spouses.Values)
+                                {
+                                    responses.Add(new Response(spouse.Name, spouse.displayName));
+                                }
+                                responses.Add(new Response("No", Game1.content.LoadString("Strings\\Lexicon:QuestionDialogue_No")));
+                                __instance.createQuestionDialogue(str, responses.ToArray(), "PolyamoryDivorce");
+                                //__instance.createQuestionDialogue(s2, responses.ToArray(), "divorce");
+                                __result = true;
+                                return false;
                         }
                     }
                 }
@@ -228,12 +227,12 @@ namespace Polyamory.Patchers
         [HarmonyPatch(typeof(ManorHouse), nameof(ManorHouse.answerDialogueAction))]
         public static class ManorHousePatch_answerDialogueAction
         {
-            public static bool ManorHouse_answerDialogueAction_Prefix(string questionAndAnswer, ref bool __result)
+            public static bool Prefix(string questionAndAnswer, ref bool __result)
             {
-                if (questionAndAnswer.StartsWith("freelovedivorce"))
+                if (questionAndAnswer.StartsWith("PolyamoryDivorce"))
                 {
 #pragma warning disable IDE0057 // Use range operator
-                    Divorce.AfterDialogueBehavior(Game1.player, questionAndAnswer.Substring("freelovedivorce".Length + 1));
+                    Divorce.AfterDialogueBehavior(Game1.player, questionAndAnswer.Substring("PolyamoryDivorce".Length + 1));
 #pragma warning restore IDE0057 // Use range operator
                     __result = true;
                     return false;

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using HarmonyLib;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using StardewValley.Locations;
@@ -18,16 +19,16 @@ namespace Polyamory
             return false;
         }
 
-        public static bool IsDatingOtherPeople(Farmer farmer, string currNpc)
+        public static bool IsDatingOtherPeople(Farmer farmer, string? currNpc = null)
         {
             bool IsDating = false;
             foreach (string npc in Game1.characterData.Keys)
             {
-                if (npc == currNpc) continue;
+                if (currNpc is not null && npc == currNpc) continue;
 
                 monitor.Log($"checking {npc}");
                 farmer.friendshipData.TryGetValue(npc, out var friendship);
-                friendship ??= farmer.friendshipData[npc] = new Friendship();
+                if (friendship is null) continue;
                 monitor.Log($"{npc}, {friendship.Status}");
                 if (friendship.Status is not FriendshipStatus.Friendly && friendship.Status is not FriendshipStatus.Divorced)
                 {
@@ -35,6 +36,22 @@ namespace Polyamory
                 }
             }
             return IsDating;
+        }
+
+        public static List<string> PeopleDating(Farmer farmer)
+        {
+            List<string>? partners = new();
+            foreach (string npc in Game1.characterData.Keys)
+            {
+                farmer.friendshipData.TryGetValue(npc, out var friendship);
+                if (friendship is null) continue;
+                if (friendship.Status is FriendshipStatus.Dating or FriendshipStatus.Engaged or FriendshipStatus.Married)
+                {
+                    partners.Add(npc);
+                }
+            }
+
+            return partners;
         }
 
         public static bool IsValidEngagement(Farmer farmer, string npc)
@@ -46,6 +63,25 @@ namespace Polyamory
             if (!HasChemistry(farmer, npc))
                 return false;
 
+            return true;
+        }
+
+        public static bool IsValidDating(Farmer farmer, string npc)
+        {
+            if (Game1.getCharacterFromName(npc) is null || (!IsNpcPolyamorous(npc) && IsDatingOtherPeople(farmer, npc)))
+            {
+                return false;
+            }
+            var dating = PeopleDating(farmer);
+            if (dating is null)
+                return true;
+            foreach (string partner in dating)
+            {
+                if (!IsNpcPolyamorous(partner))
+                {
+                    return false;
+                }
+            }
             return true;
         }
 
