@@ -21,8 +21,6 @@ Polyamory prioritizes Mod Author customizability by introducing the Monogamy/Pol
 
 That's it.
 
-### Compatibility
-
 ## For Modders
 ### NPC Polyamory Data
 
