@@ -24,7 +24,7 @@ That's it.
 ## For Modders
 ### NPC Polyamory Data
 
-Polyamory Data is located in the `EnderTedi.Polyamory/Data` asset. It is a Dictonary with the key being an NPC's Internal Name and the value being a model with the fields:
+Polyamory Data is located in the `EnderTedi.Polyamory/Data` asset. It is a Dictionary with the key being an NPC's Internal Name and the value being a model with the fields:
 
 <table>
 <tr>
