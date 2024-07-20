@@ -16,7 +16,7 @@ Polyamory prioritizes Mod Author customizability by introducing the Monogamy/Pol
 ## For Players
 ### Install
 1. [Install the latest version of SMAPI](https://smapi.io/).
-2. Install [this mod from Nexus Mods](https://www.nexusmods.com/stardewvalley/mods/26081). -- Currently Unavaiable, download from the Releases tab on Github.
+2. Install [this mod from Nexus Mods](https://www.nexusmods.com/stardewvalley/mods/26081). -- Currently Unavailable, download from the Releases tab on Github.
 3. Run the game using SMAPI.
 
 That's it.
