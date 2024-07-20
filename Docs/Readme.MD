@@ -1,4 +1,4 @@
-**Polyamory** is a [Stardew Valley](http://stardewvalley.net/) Mod is another take on adding polyamory mechanics to the game. 
+**Polyamory** is a [Stardew Valley](http://stardewvalley.net/) Mod which provides another take on adding polyamory mechanics to the game. 
 Polyamory prioritizes Mod Author customizability by introducing the Monogamy/Polyamory system for NPCs. 
 
 ## Content
