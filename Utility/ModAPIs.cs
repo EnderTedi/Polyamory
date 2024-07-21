@@ -182,9 +182,9 @@ namespace Polyamory
                     else if (SaveGame.loaded?.player != null)
                         player = SaveGame.loaded.player;
                     else
-                        return null;
+                        return new string[] { "false" };
 
-                    return new string[] { Polyamory.IsDatingOtherPeople(player).ToString() };
+                    return new string[] { Polyamory.IsDatingOtherPeople(player) ? "true" : "false" };
                 });
             }
         }

@@ -11,6 +11,7 @@
 	<MinimumGameVersion>1.6.0</MinimumGameVersion>
 	  <EnableHarmony>true</EnableHarmony>
 	  <UpdateKeys>Nexus:26081</UpdateKeys>
+	  <Version>1.0.0-beta.1</Version>
   </PropertyGroup>
 	
   <ItemGroup>
