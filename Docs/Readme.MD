@@ -112,6 +112,7 @@ Polyamory provides an C# API:
 - `bool IsNpcPolyamorous(string npc)` Returns whether the specified npc is polyamorous.
 - `bool IsValidDating(Farmer farmer, string npc, string? newNpc = null)` Returns whether the specified farmer can date/get engaged/room with the specified NPC.
 - `bool HasChemistry(Farmer farmer, string npc)` Returns whether the specified farmer's current partners have chemistry with the specified NPC.
+- `bool IsWithMonogamousNPC(Farmer farmer)` Returns whether the specified farmer is currently dating or rooming with a monogamous NPC.
 - `List<string> PeopleDating(Farmer farmer)` Returns a list with the names of all the NPCs the specified farmer is dating.
 - `Dictionary<string, NPC> GetSpouses(Farmer farmer, bool all = true)` Returns spouses for the given farmer.
 

@@ -61,6 +61,6 @@ namespace Polyamory
         /// </summary>
         /// <param name="farmer">Farmer to check against</param>
         /// <returns>Bool</returns>
-        public bool IsWithMonogamousNPC(Farmer farmer);
+        bool IsWithMonogamousNPC(Farmer farmer);
     }
 }
