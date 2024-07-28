@@ -8,7 +8,7 @@ Polyamory prioritizes Mod Author customizability by introducing the Monogamy/Pol
 	* [NPC Polyamory Data](#NPC-Polyamory-Data)
 	* [Custom Dialogue Keys](#Custom-Dialogue-Keys)
 	* [Content Patcher Tokens](#Content-Patcher-Tokens)
-	* [C# API](#C#-API)
+	* [C# API](#C-API)
 * [See Also](#See-Also)
 
 
