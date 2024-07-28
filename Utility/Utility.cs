@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using StardewValley.Locations;
@@ -54,42 +53,26 @@ namespace Polyamory
             return partners;
         }
 
-        public static bool IsValidEngagement(Farmer farmer, string npc)
-        {
-            if (Game1.getCharacterFromName(npc) is null || (!IsNpcPolyamorous(npc) && farmer.isMarriedOrRoommates()))
-                return false;
-            if (IsMarriedToNonPolyamorousNPC(farmer) && farmer.isMarriedOrRoommates())
-                return false;
-            if (!HasChemistry(farmer, npc))
-                return false;
-
-            return true;
-        }
-
         public static bool IsValidDating(Farmer farmer, string npc)
         {
-            if (Game1.getCharacterFromName(npc) is null || (!IsNpcPolyamorous(npc) && IsDatingOtherPeople(farmer, npc)))
-            {
-                return false;
-            }
+            if (Game1.getCharacterFromName(npc) is null) return false;
+            if (!HasChemistry(farmer, npc)) return false;
             var dating = PeopleDating(farmer);
-            if (dating is null)
-                return true;
+            if (dating is null) return true;
             foreach (string partner in dating)
             {
-                if (HasChemistry(farmer, partner))
-                if (!IsNpcPolyamorous(partner))
-                {
-                    return false;
-                }
+                if (partner == npc) continue;
+                if (partner != npc && !IsNpcPolyamorous(npc)) return false;
+                if (!HasChemistry(farmer, partner)) return false;
+                if (!IsNpcPolyamorous(partner)) return false;
             }
             return true;
         }
 
-        public static bool IsMarriedToNonPolyamorousNPC(Farmer farmer)
+        public static bool IsWithMonogamousNPC(Farmer farmer)
         {
-            var spouses = GetSpouses(farmer, true);
-            foreach (string spouse in spouses.Keys)
+            var spouses = PeopleDating(farmer);
+            foreach (string spouse in spouses)
             {
                 if (!IsNpcPolyamorous(spouse))
                     return true;
@@ -97,31 +80,36 @@ namespace Polyamory
             return false;
         }
 
-        public static bool HasChemistry(Farmer farmer, string npc)
+        public static bool HasChemistry(Farmer farmer, string npc, string? newNpc = null)
         {
             Dictionary<string, PolyamoryData>? data = helper.GameContent.Load<Dictionary<string, PolyamoryData>>($"{modid}/PolyamoryData");
-            data.TryGetValue(npc, out PolyamoryData? npcData);
 
-            var spouses = PeopleDating(farmer);
-            foreach (string spouse in spouses)
+            var partners = PeopleDating(farmer);
+            foreach (string partner in partners)
             {
-                if (npcData is not null)
+                if (newNpc is not null)
                 {
+                    data.TryGetValue(newNpc, out PolyamoryData? npcData);
+                    if (npcData is not null)
+                    {
 #pragma warning disable CS8604 // Possible null reference argument.
-                    if (npcData.PositiveChemistry is not null && !npcData.NegativeChemistry.Contains(spouse))
-                        return false;
-                    else if (npcData.NegativeChemistry is not null && npcData.NegativeChemistry.Contains(spouse))
-                        return false;
+                        if (npcData.PositiveChemistry is not null && !npcData.NegativeChemistry.Contains(partner))
+                            return false;
+                        else if (npcData.NegativeChemistry is not null && npcData.NegativeChemistry.Contains(partner))
+                            return false;
 #pragma warning restore CS8604 // Possible null reference argument.
+                    }
                 }
 
-                data.TryGetValue(spouse, out PolyamoryData? spouseData);
+                data.TryGetValue(partner, out PolyamoryData? spouseData);
                 if (spouseData is null)
                     continue;
-                if (spouseData.PositiveChemistry is not null && !spouseData.PositiveChemistry.Contains(npc))
+#pragma warning disable IDE0075 // Simplify conditional expression
+                if (spouseData.PositiveChemistry is not null && (!spouseData.PositiveChemistry.Contains(npc) || newNpc == null ? false : !spouseData.PositiveChemistry.Contains(newNpc)))
                     return false;
-                else if (spouseData.NegativeChemistry is not null && spouseData.NegativeChemistry.Contains(npc))
+                else if (spouseData.NegativeChemistry is not null && (spouseData.NegativeChemistry.Contains(npc) || newNpc == null ? false : spouseData.NegativeChemistry.Contains(newNpc)))
                     return false;
+#pragma warning restore IDE0075 // Simplify conditional expression
             }
             return true;
         }
@@ -265,8 +253,10 @@ namespace Polyamory
 
             ShuffleList(ref allSpouses);
 
-            List<string> bedSpouses = new();
-            string? kitchenSpouse = null;
+            List<string> BedSpouses = new();
+            string? KitchenSpouse = null;
+            string? PorchSpouse = null;
+            string? PatioSpouse = null;
 
             foreach (NPC spouse in allSpouses)
             {
@@ -290,31 +280,98 @@ namespace Polyamory
 
                 monitor.Log($"spouse rand {type}, bed: {Config.PercentChanceForSpouseInBed} kitchen {Config.PercentChanceForSpouseInKitchen}");
 
-                if (type < Config.PercentChanceForSpouseInBed)
+                if (BedSpouses.Count <= MathF.Ceiling(Spouses.Count / 4) && (!farmer.friendshipData[spouse.Name].IsRoommate()) && HasSleepingAnimation(spouse.Name) && type < Config.PercentChanceForSpouseInBed)
                 {
-                    if (bedSpouses.Count < 1 && (!farmer.friendshipData[spouse.Name].IsRoommate()) && HasSleepingAnimation(spouse.Name))
-                    {
-                        monitor.Log("made bed spouse: " + spouse.Name);
-                        bedSpouses.Add(spouse.Name);
-                    }
-
+                    monitor.Log("made bed spouse: " + spouse.Name);
+                    BedSpouses.Add(spouse.Name);
                 }
-                else if (type < Config.PercentChanceForSpouseInBed + Config.PercentChanceForSpouseInKitchen)
+                else if (KitchenSpouse is null && type < Config.PercentChanceForSpouseInBed + Config.PercentChanceForSpouseInKitchen)
                 {
-                    if (kitchenSpouse == null)
-                    {
-                        monitor.Log("made kitchen spouse: " + spouse.Name);
-                        kitchenSpouse = spouse.Name;
-                    }
+                    monitor.Log("made kitchen spouse: " + spouse.Name);
+                    KitchenSpouse = spouse.Name;
                 }
-                else if (type < Config.PercentChanceForSpouseInBed + Config.PercentChanceForSpouseInKitchen + Config.PercentChanceForSpouseAtPatio)
+                else if (PorchSpouse is null && PatioSpouse is null && type < Config.PercentChanceForSpouseInBed + Config.PercentChanceForSpouseInKitchen + Config.PercentChangeForSpouseInPorch)
                 {
-                    if (!Game1.isRaining && !Game1.IsWinter && !Game1.shortDayNameFromDayOfSeason(Game1.dayOfMonth).Equals("Sat") && !spouse.Name.Equals("Krobus") && spouse.Schedule == null)
+                    monitor.Log("made porch spouse: " + spouse.Name);
+                    PorchSpouse = spouse.Name;
+                }
+                else if (type < Config.PercentChanceForSpouseInBed + Config.PercentChanceForSpouseInKitchen + Config.PercentChangeForSpouseInPorch + Config.PercentChanceForSpouseAtPatio)
+                {
+                    if (PatioSpouse is null && PorchSpouse is null && !Game1.isRaining && !Game1.IsWinter && !Game1.shortDayNameFromDayOfSeason(Game1.dayOfMonth).Equals("Sat") && !spouse.Name.Equals("Krobus") && spouse.Schedule == null)
                     {
                         monitor.Log("made patio spouse: " + spouse.Name);
                         spouse.setUpForOutdoorPatioActivity();
+                        PatioSpouse = spouse.Name;
                         monitor.Log($"{spouse.Name} at {spouse.currentLocation.Name} {spouse.TilePoint}");
                     }
+                }
+            }
+
+            Point SpouseRoomSpot = farmHouse.spouseRoomSpot;
+            foreach (NPC spouse in allSpouses)
+            {
+                IDictionary npcExtData = Game1.content.Load<IDictionary>("spacechase0.SpaceCore/NpcExtensionData");
+                if (npcExtData is not null && npcExtData.Contains($"{spouse}"))
+                {
+                    var entry = npcExtData[spouse.Name] as dynamic;
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                    if (entry.IgnoreMarriageSchedule)
+                    {
+                        continue;
+                    }
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+                }
+                if (PatioSpouse == spouse.Name) continue;
+                if (BedSpouses is not null && BedSpouses.Contains(spouse.Name))
+                {
+                    monitor.Log($"{spouse.displayName.ToUpper()} IS A BED SPOUSE", StardewModdingAPI.LogLevel.Error);
+                    monitor.Log("Placing bed spouses");
+                    Vector2 bedSpot = GetSpouseBedPosition(farmHouse, spouse.Name) / 64f;
+                    spouse.setTileLocation(bedSpot);
+                    BedSpouses.Remove(spouse.Name);
+                }
+                else if (KitchenSpouse is not null && KitchenSpouse == spouse.Name)
+                {
+                    monitor.Log("Placing kitchen spouse");
+                    Point KitchenSpot = farmHouse.getKitchenStandingSpot();
+                    spouse.setTilePosition(KitchenSpot);
+                    spouse.setRandomAfternoonMarriageDialogue(Game1.timeOfDay, farmHouse, false);
+                    KitchenSpouse = null;
+                }
+                else if (PorchSpouse is not null && PorchSpouse == spouse.Name)
+                {
+                    monitor.Log("Placing porch spouse");
+                    Point PorchSpot = farmHouse.getPorchStandingSpot();
+                    Game1.warpCharacter(spouse, "Farm", PorchSpot);
+                    spouse.faceDirection(2);
+                    PorchSpouse = null;
+                }
+                else if (SpouseRoomSpot.X > -1 && !IsTileOccupied(farmHouse, SpouseRoomSpot, spouse.Name))
+                {
+                    monitor.Log($"Placing spouse room spouse");
+                    spouse.setTilePosition(SpouseRoomSpot);
+                    spouse.setSpouseRoomMarriageDialogue();
+                }
+                else
+                {
+                    monitor.Log("Placing other spouses");
+                    Point RandomSpot = farmHouse.getRandomOpenPointInHouse(random);
+                    int i = 0;
+                    while (i < 100 && RandomSpot == Point.Zero)
+                    {
+                        RandomSpot = farmHouse.getRandomOpenPointInHouse(random);
+                    }
+                    if (RandomSpot == Point.Zero)
+                    {
+                        monitor.Log("Placing bed spouses");
+                        Vector2 bedSpot = GetSpouseBedPosition(farmHouse, spouse.Name) / 64f;
+                        spouse.setTileLocation(bedSpot);
+                        continue;
+                    }
+
+                    spouse.setTilePosition(RandomSpot);
+                    spouse.faceDirection(random.Next(0, 4));
+                    spouse.setRandomAfternoonMarriageDialogue(Game1.timeOfDay, farmHouse, false);
                 }
             }
         }
@@ -355,14 +412,27 @@ namespace Polyamory
 
         public static List<string> ReorderSpousesForSleeping(List<string> sleepSpouses)
         {
+            List<string> configSpouses = Config.SpouseSleepOrder.Split(',').Where(s => s.Length > 0).ToList();
             List<string> spouses = new();
+            foreach (string s in configSpouses)
+            {
+                if (sleepSpouses.Contains(s))
+                    spouses.Add(s);
+            }
 
             foreach (string s in sleepSpouses)
             {
                 if (!spouses.Contains(s))
                 {
                     spouses.Add(s);
+                    configSpouses.Add(s);
                 }
+            }
+            string configString = string.Join(",", configSpouses);
+            if (configString != Config.SpouseSleepOrder)
+            {
+                Config.SpouseSleepOrder = configString;
+                helper.WriteConfig(Config);
             }
 
             return spouses;
@@ -397,7 +467,7 @@ namespace Polyamory
             var allBedmates = GetBedSpouses(fh);
 
             Point bedStart = GetBedStart(fh);
-            int x = 64 + (int)((allBedmates.IndexOf(name) + 1) / (float)(allBedmates.Count + 1) * (GetBedWidth() - 1) * 64);
+            float x = 64 + ((allBedmates.IndexOf(name) + 1) / (float)(allBedmates.Count + 1) * (GetBedWidth() - 1) * 64);
             return new Vector2(bedStart.X * 64 + x, bedStart.Y * 64 + bedSleepOffset - (GetTopOfHeadSleepOffset(name) * 4));
         }
 
@@ -490,6 +560,22 @@ namespace Polyamory
                 return true;
             }
             return false;
+        }
+
+        public static Dialogue FetchAppropriateDialogue(NPC npc, Farmer who, int Type)
+        {
+            var partners = PeopleDating(who);
+            string[] DialogueType = { "RejectBouquet", "RejectMermaidPendant", "RejectRoommateProposal" };
+            if (!IsNpcPolyamorous(npc.Name))
+            {
+                Dialogue dialogue = npc.TryGetDialogue(DialogueType[Type] + "_IsMonogamous_PlayerWithOtherPeople", Game1.getCharacterFromName(partners[random.Next(0, partners.Count - 1)]).displayName);
+                return dialogue ?? Dialogue.FromTranslation(npc, "Strings\\StringsFromCSFiles:" + DialogueType[Type] + "_IsMonogamous_PlayerWithOtherPeople", Game1.getCharacterFromName(partners[random.Next(0, partners.Count - 1)]).displayName);
+            }
+            else
+            {
+                Dialogue dialogue = npc.TryGetDialogue(DialogueType[Type] + "IsPolyamorous_PlayerWithSomeoneMonogamous", Game1.getCharacterFromName(partners[0]).displayName);
+                return dialogue ?? Dialogue.FromTranslation(npc, "Strings\\StringsFromCSFiles:" + DialogueType[Type] + "_IsPolyamorous_PlayerWithSomeoneMonogamous", Game1.getCharacterFromName(partners[0]).displayName);
+            }
         }
 
         public static void ShuffleList<T>(ref List<T> list)

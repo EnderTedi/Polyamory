@@ -1,0 +1,59 @@
+{
+  "Abigail": {
+    "NegativeChemistry": [ "Caroline", "Pierre" ]
+  },
+  "Caroline": {
+    "NegativeChemistry": [ "Abigail" ]
+  },
+  "Demetrius": {
+    "NegativeChemistry": [ "Maru", "Sebastian" ]
+  },
+  "Emily": {
+    "NegativeChemistry": [ "Haley" ]
+  },
+  "Evelyn": {
+    "NegativeChemistry": [ "Alex" ]
+  },
+  "George": {
+    "NegativeChemistry": [ "Alex" ]
+  },
+  "Haley": {
+    "NegativeChemistry": [ "Emily" ]
+  },
+  "Jodi": {
+    "NegativeChemistry": [ "Sam" ]
+  },
+  "Alex": {
+    "NegativeChemistry": [ "Evelyn", "George" ]
+  },
+  "Kent": {
+    "NegativeChemistry": [ "Sam" ]
+  },
+  "Marnie": {
+    "NegativeChemistry": [ "Shane" ]
+  },
+  "Maru": {
+    "NegativeChemistry": [ "Sebastian", "Robin", "Demetrius" ]
+  },
+  "Pam": {
+    "NegativeChemistry": [ "Penny" ]
+  },
+  "Penny": {
+    "NegativeChemistry": [ "Pam" ]
+  },
+  "Pierre": {
+    "NegativeChemistry": [ "Abigail" ]
+  },
+  "Robin": {
+    "NegativeChemistry": [ "Sebastian", "Maru" ]
+  },
+  "Sam": {
+    "NegativeChemistry": [ "Jodi", "Kent" ]
+  },
+  "Sebastian": {
+    "NegativeChemistry": [ "Maru", "Robin", "Demetrius" ]
+  },
+  "Shane": {
+    "NegativeChemistry": [ "Marnie" ]
+  }
+}

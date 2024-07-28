@@ -97,7 +97,8 @@ namespace Polyamory
                     name: () => I18n.Config_MaxChildren_Name(),
                     tooltip: () => I18n.Config_MaxChildren_Description(),
                     getValue: () => config.MaxChildren,
-                    setValue: value => config.MaxChildren = value
+                    setValue: value => config.MaxChildren = value,
+                    min: 0
                     );
 
                 GMCM.AddBoolOption(
@@ -123,7 +124,9 @@ namespace Polyamory
                     name: () => I18n.Config_PercentChanceForSpouseInBed_Name(),
                     tooltip: () => I18n.Config_PercentChanceForSpouseInBed_Description(),
                     getValue: () => config.PercentChanceForSpouseInBed,
-                    setValue: value => config.PercentChanceForSpouseInBed = value
+                    setValue: value => config.PercentChanceForSpouseInBed = value,
+                    min: 0,
+                    max: 100
                     );
 
                 GMCM.AddNumberOption(
@@ -131,7 +134,19 @@ namespace Polyamory
                     name: () => I18n.Config_PercentChanceForSpouseInKitchen_Name(),
                     tooltip: () => I18n.Config_PercentChanceForSpouseInKitchen_Description(),
                     getValue: () => config.PercentChanceForSpouseInKitchen,
-                    setValue: value => config.PercentChanceForSpouseInKitchen = value
+                    setValue: value => config.PercentChanceForSpouseInKitchen = value,
+                    min: 0,
+                    max: 100
+                    );
+
+                GMCM.AddNumberOption(
+                    mod: mod.ModManifest,
+                    name: () => I18n.Config_PercentChanceForSpouseInPorch_Name(),
+                    tooltip: () => I18n.Config_PercentChanceForSpouseInPorch_Description(),
+                    getValue: () => config.PercentChangeForSpouseInPorch,
+                    setValue: value => config.PercentChangeForSpouseInPorch = value,
+                    min: 0,
+                    max: 100
                     );
 
                 GMCM.AddNumberOption(
@@ -139,7 +154,9 @@ namespace Polyamory
                     name: () => I18n.Config_PercentChanceForSpouseAtPatio_Name(),
                     tooltip: () => I18n.Config_PercentChanceForSpouseAtPatio_Description(),
                     getValue: () => config.PercentChanceForSpouseAtPatio,
-                    setValue: value => config.PercentChanceForSpouseAtPatio = value
+                    setValue: value => config.PercentChanceForSpouseAtPatio = value,
+                    min: 0,
+                    max: 100
                     );
             }
 
@@ -182,9 +199,35 @@ namespace Polyamory
                     else if (SaveGame.loaded?.player != null)
                         player = SaveGame.loaded.player;
                     else
-                        return new string[] { "false" };
+                        return null;
 
                     return new string[] { Polyamory.IsDatingOtherPeople(player) ? "true" : "false" };
+                });
+
+                contentPatcher.RegisterToken(mod.ModManifest, "HasMonogamousPartner", getValue: () =>
+                {
+                    Farmer player;
+
+                    if (Context.IsWorldReady)
+                        player = Game1.player;
+                    else if (SaveGame.loaded?.player != null)
+                        player = SaveGame.loaded.player;
+                    else
+                        return null;
+
+                    List<string> partners = Polyamory.PeopleDating(player);
+
+                    if (partners is null) 
+                        return new string[] { "false" };
+
+                    foreach (string partner in partners)
+                    {
+                        if (!Polyamory.IsNpcPolyamorous(partner))
+                        {
+                            return new string[] { "true" };
+                        }
+                    }
+                    return new string[] { "false" };
                 });
             }
         }

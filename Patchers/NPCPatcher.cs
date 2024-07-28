@@ -1,17 +1,16 @@
 ﻿using HarmonyLib;
+using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Audio;
+using StardewValley.Characters;
 using StardewValley.Extensions;
 using StardewValley.Locations;
+using System.Collections;
 using System.Reflection;
+using Color = Microsoft.Xna.Framework.Color;
 using Object = StardewValley.Object;
 using Vector2 = Microsoft.Xna.Framework.Vector2;
-using Color = Microsoft.Xna.Framework.Color;
-
-using Microsoft.Xna.Framework;
-using StardewValley.Characters;
-using System.Collections;
 
 namespace Polyamory.Patchers
 {
@@ -44,60 +43,77 @@ namespace Polyamory.Patchers
 
                 Object activeObj = who.ActiveObject;
                 bool canReceiveGifts = __instance.CanReceiveGifts();
-                Dialogue pendantReject = __instance.TryGetDialogue("RejectItem_(O)460");
 
-
-                if (canReceiveGifts && activeObj is not null && activeObj.QualifiedItemId == "(O)458" && who.friendshipData.ContainsKey(__instance.Name) && __instance.datable.Value)
+                if (who.getFriendshipHeartLevelForNPC(__instance.Name) >= 10 && !probe && canReceiveGifts && activeObj is not null && activeObj.QualifiedItemId == "(O)458")
                 {
-                    helper.GameContent.InvalidateCache("Characters\\Dialogue\\" + __instance.Name);
-                    helper.GameContent.Load<Dictionary<string, string>>("Characters\\Dialogue\\" + __instance.Name);
-                    if (who.friendshipData[__instance.Name].TalkedToToday == true)
+                    if (!Polyamory.IsValidDating(who, __instance.Name))
                     {
-                        __instance.CurrentDialogue.Clear();
+                        monitor.Log("Can't date, will attempt to use custom reject dialogue");
+                        __instance.setNewDialogue(Polyamory.FetchAppropriateDialogue(__instance, who, 1));
+                        Game1.drawDialogue(__instance);
+                        __result = false;
+                        return false;
+                    }
+                    else
+                    {
+                        Dialogue Reject = __instance.TryGetDialogue("RejectItem_" + activeObj.QualifiedItemId);
+                        Reject ??= __instance.TryGetDialogue("RejectBouquet")
+                            ?? (Game1.random.NextBool() ? new Dialogue(__instance, "Strings\\StringsFromCSFiles:NPC.cs.3956") : new Dialogue(__instance, "Strings\\StringsFromCSFiles:NPC.cs.3957", isGendered: true));
+                            
+                        __instance.CurrentDialogue.Push(Reject);
+                        Game1.drawDialogue(__instance);
+                        __result = false;
+                        return false;
                     }
                 }
 
-                switch (activeObj.QualifiedItemId)
+                if (who.getFriendshipHeartLevelForNPC(__instance.Name) >= 10 && !probe && canReceiveGifts && activeObj is not null && activeObj.HasContextTag(ItemContextTagManager.SanitizeContextTag("propose_roommate_" + __instance.Name)))
+                {
+                    if (!Polyamory.IsValidDating(who, __instance.Name) && ( who.friendshipData[__instance.Name] is null || who.friendshipData[__instance.Name].Status is FriendshipStatus.Friendly or FriendshipStatus.Divorced))
+                    {
+                        monitor.Log("Can't roommate, will attempt to use custom reject dialogue");
+                        __instance.setNewDialogue(Polyamory.FetchAppropriateDialogue(__instance, who, 3));
+                        Game1.drawDialogue(__instance);
+                        __result = false;
+                        return false;
+                    }
+                    else if (__instance.TryGetDialogue("rejectItem_" + activeObj.QualifiedItemId) is not null)
+                    {
+                        __instance.setNewDialogue(__instance.TryGetDialogue("rejectItem_" + activeObj.QualifiedItemId));
+                        Game1.drawDialogue(__instance);
+                        __result = false;
+                        return false;
+                    }
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                    typeof(NPC).GetMethod("engagementResponse", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { who, true });
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+                    __result = true;
+                    return false;
+                }
+
+                switch (activeObj?.QualifiedItemId)
                 {
                     case "(O)460":
-                        if (!__instance.datable.Value || who.HouseUpgradeLevel >= 1 && canReceiveGifts && !probe)
+                        if (canReceiveGifts && !probe)
                         {
                             monitor.Log("Will attempt to use reject dialogue if conditions apply");
-                            if (!Polyamory.IsValidEngagement(who, __instance.Name) || !Polyamory.IsValidDating(who, __instance.Name))
+                            if (__instance.datable.Value || who.HouseUpgradeLevel >= 1)
                             {
-                                monitor.Log("Can't marry, will attempt to use custom reject dialogue");
-                                if (!Polyamory.IsNpcPolyamorous(__instance.Name))
+                                if (!Polyamory.IsValidDating(who, __instance.Name))
                                 {
-                                    monitor.Log($"{__instance.Name} is monogamous NPC", LogLevel.Warn);
-                                    Dialogue npcDialog = __instance.TryGetDialogue("CantMarry_IsMonogamousNPC");
-                                    Dialogue baseDialogue = new(__instance, "Strings\\StringsFromCSFiles:Marriage_IsNonPolyamorousNPC");
-                                    if (npcDialog != null)
-                                        __instance.CurrentDialogue.Push(npcDialog);
-                                    else
-                                        __instance.CurrentDialogue.Push(baseDialogue);
-                                    Game1.drawDialogue(__instance);
-                                    __result = false;
-                                    return false;
-                                }
-                                else if (Polyamory.IsMarriedToNonPolyamorousNPC(who))
-                                {
-                                    monitor.Log($"{__instance.Name} can't get married. player married to monogamous npc", LogLevel.Warn);
-                                    Dialogue npcDialog = __instance.TryGetDialogue("CantMarry_MarriedMonogamousNPC");
-                                    Dialogue baseDialogue = new(__instance, "Strings\\StringsFromCSFiles:Marriage_NonPolyamorousNPC");
-                                    if (npcDialog != null)
-                                        __instance.CurrentDialogue.Push(npcDialog);
-                                    else
-                                        __instance.CurrentDialogue.Push(baseDialogue);
+                                    __instance.setNewDialogue(Polyamory.FetchAppropriateDialogue(__instance, who, 2));
                                     Game1.drawDialogue(__instance);
                                     __result = false;
                                     return false;
                                 }
                             }
-                            else if (pendantReject is not null)
+                            Dialogue pendantReject = __instance.TryGetDialogue("RejectItem_(O)460");
+                            if (pendantReject is not null)
                             {
                                 __instance.setNewDialogue(pendantReject);
                                 Game1.drawDialogue(__instance);
                                 __result = false;
+                                return false;
                             }
                         }
                         if (canReceiveGifts)
@@ -151,9 +167,9 @@ namespace Polyamory.Patchers
                                 else
                                 {
                                     monitor.Log($"Tried to give pendant to someone marriable");
-                                    if (!__instance.datable.Value || who.HouseUpgradeLevel >= 1 && Polyamory.IsValidEngagement(who, __instance.Name))
+                                    if (__instance.datable.Value && who.HouseUpgradeLevel >= 1 && Polyamory.IsValidDating(who, __instance.Name))
                                     {
-                                        monitor.Log($"{__instance.Name} is getting married", LogLevel.Warn);
+                                        monitor.Log($"{__instance.Name} is getting married");
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                                         typeof(NPC).GetMethod("engagementResponse", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { who, false });
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
@@ -177,7 +193,6 @@ namespace Polyamory.Patchers
                         }
                         break;
                 }
-                
                 return true;
             }
 
@@ -220,7 +235,7 @@ namespace Polyamory.Patchers
                 {
                     if (Game1.player.isMarriedOrRoommates() && Game1.player.friendshipData.ContainsKey(__instance.Name) && Game1.player.friendshipData[__instance.Name].IsMarried() && Game1.player.spouse != __instance.Name)
                     {
-                       Polyamory.tempSpouse = __instance;
+                        Polyamory.tempSpouse = __instance;
                         __state = true;
                     }
                 }
@@ -407,7 +422,7 @@ namespace Polyamory.Patchers
         {
             internal static void Prefix(NPC __instance, ref string? __state)
             {
-                
+
                 try
                 {
                     IDictionary npcExtData = Game1.content.Load<IDictionary>("spacechase0.SpaceCore/NpcExtensionData");
@@ -417,7 +432,6 @@ namespace Polyamory.Patchers
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                         if (entry.IgnoreMarriageSchedule)
                         {
-                            monitor.Log($"{__instance.Name}, {(bool)entry.IgnoreMarriageSchedule}", LogLevel.Alert);
                             __state = null;
                             if (Game1.player.spouse == __instance.Name)
                             {

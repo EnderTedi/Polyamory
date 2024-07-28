@@ -10,7 +10,7 @@
   "UniqueID": "EnderTedi.Polyamory",
   "Name": "Polyamory",
   "Author": "EnderTedi",
-  "Version": "1.0.0-beta.1",
+  "Version": "1.0.0-beta.2",
   "Description": "Polyamory with exclusions",
   "MinimumApiVersion": "4.0.0",
   "MinimumGameVersion": "1.6.0",
@@ -18,6 +18,11 @@
   "Dependencies": [
     {
       "UniqueID": "pathoschild.ContentPatcher",
+      "IsRequired": false
+    },
+    {
+      "UniqueID": "spacechase0.SpaceCore",
+      "MinimumVersion": "1.24.0",
       "IsRequired": false
     }
   ],

@@ -135,7 +135,7 @@ namespace Polyamory.Patchers
                     }
                     if (Game1.CurrentEvent == null && who.CurrentItem != null && who.CurrentItem.ParentSheetIndex == 801 && !__instance.isEngaged() && !who.isEngaged())
                     {
-                        if (!Polyamory.IsMarriedToNonPolyamorousNPC(__instance) && !Polyamory.IsMarriedToNonPolyamorousNPC(who))
+                        if (!Polyamory.IsWithMonogamousNPC(__instance) && !Polyamory.IsWithMonogamousNPC(who))
                         {
                             who.Halt();
                             who.faceGeneralDirection(__instance.getStandingPosition(), 0, false);

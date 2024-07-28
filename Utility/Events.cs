@@ -8,10 +8,13 @@ namespace Polyamory
 {
     internal partial class Polyamory
     {
+        [EventPriority(EventPriority.Low)]
         private void OnAssetRequested(object? sender, AssetRequestedEventArgs e)
         {
             if (e.NameWithoutLocale.IsEquivalentTo($"{modid}\\PolyamoryData"))
-                e.LoadFrom(() => new Dictionary<string, PolyamoryData>(), AssetLoadPriority.Low);
+            {
+                e.LoadFromModFile<Dictionary<string, PolyamoryData>>("Assets\\DefaultData.json", AssetLoadPriority.High);
+            }
 
             if (e.NameWithoutLocale.IsEquivalentTo("Strings\\StringsFromCSFiles"))
             {
@@ -19,10 +22,12 @@ namespace Polyamory
                 {
                     var data = asset.AsDictionary<string, string>().Data;
 
-                    data.Add("Dating_NonPolyamorousNPC", I18n.Dating_NonPolyamorousNPC());
-                    data.Add("Dating_IsNonPolyamorousNPC", I18n.Dating_IsNonPolyamorousNPC());
-                    data.Add("Marriage_NonPolyamorousNPC", I18n.Marriage_NonPolyamorousNPC());
-                    data.Add("Marriage_IsNonPolyamorousNPC", I18n.Marriage_IsNonPolyamorousNPC());
+                    data.Add("RejectBouquet_IsMonogamous_PlayerWithOtherPeople", I18n.RejectBouquet_IsMonogamous_PlayerWithOtherPeople());
+                    data.Add("RejectBouquet_IsPolyamorous_PlayerWithSomeoneMonogamous", I18n.RejectBouquet_IsPolyamorous_PlayerWithSomeoneMonogamous());
+                    data.Add("RejectMermaidPendant_IsMonogamous_PlayerWithOtherPeople", I18n.RejectMermaidPendant_IsMonogamous_PlayerWithOtherPeople());
+                    data.Add("RejectMermaidPendant_IsPolyamorous_PlayerWithSomeoneMonogamous", I18n.RejectMermaidPendant_IsPolyamorous_PlayerWithSomeoneMonogamous());
+                    data.Add("RejectRoommateProposal_IsMonogamous_PlayerWithOtherPeople", I18n.RejectRoommateProposal_IsMonogamous_PlayerWithOtherPeople());
+                    data.Add("RejectRoommateProposal_IsPolyamorous_PlayerWithSomeoneMonogamous", I18n.RejectRoommateProposal_IsPolyamorous_PlayerWithSomeoneMonogamous());
                 });
             }
 
@@ -62,65 +67,12 @@ namespace Polyamory
                 {
                     var data = asset.AsDictionary<string, string>().Data;
                     string key = "Beach_Mariner_PlayerBuyItem_AnswerYes";
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-                    if (data.TryGetValue(key, out string value))
+                    if (data.TryGetValue(key, out var value))
                     {
-                        string newValue = value.ToString().Replace("5000", Config.PendantPrice.ToString());
+                        string newValue = value.Replace("5000", $"{Config.PendantPrice}");
                         data[key] = newValue;
                     }
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 });
-            }
-        }
-
-        [EventPriority(EventPriority.Low)]
-        private void OnAssetRequested2(object? ender, AssetRequestedEventArgs e)
-        {
-            if (Context.IsWorldReady && Game1.player is not null)
-            {
-                foreach (string npc in Game1.characterData.Keys)
-                {
-                    if (Game1.player.spouse is null) break;
-                    if (Game1.getCharacterFromName(npc) is null
-                        || !Game1.player.friendshipData.TryGetValue(npc, out var _)
-                        || !Game1.getCharacterFromName(npc, true).datable.Value
-                        || Game1.player.getFriendshipHeartLevelForNPC(npc) < 8) continue;
-
-                    if (e.NameWithoutLocale.IsEquivalentTo("Characters\\Dialogue\\" + npc))
-                    {
-                        monitor.Log($"{npc}");
-                        e.Edit(asset =>
-                        {
-                            var data = asset.AsDictionary<string, string>().Data;
-                            if (!IsNpcPolyamorous(npc) && !IsValidDating(Game1.player, npc))
-                            {
-                                data.Remove("RejectItem_(O)458");
-                                if (data.ContainsKey("CantDate_IsMonogamousNPC"))
-                                {
-                                    data.Add("RejectItem_(O)458", data["Dating_IsNonPolyamorousNPC"]);
-                                }
-                                else
-                                {
-                                    data.Add("RejectItem_(O)458", I18n.Dating_IsNonPolyamorousNPC());
-                                }
-                            }
-                            else if (!IsValidDating(Game1.player, npc))
-                            {
-                                data.Remove("RejectItem_(O)458");
-                                if (data.Any())
-                                    if (data.ContainsKey("CantDate_DatingNonPolyamorousNPC"))
-                                    {
-                                        monitor.Log($"trying to give {npc} ");
-                                        data.Add("RejectItem_(O)458", data["CantDating_DatingMonogamousNPC"]);
-                                    }
-                                    else
-                                    {
-                                        data.Add("RejectItem_(O)458", I18n.Dating_NonPolyamorousNPC().Replace("$SpouseName$", Game1.getCharacterFromName(Game1.player.spouse).displayName, StringComparison.OrdinalIgnoreCase));
-                                    }
-                            }
-                        }, AssetEditPriority.Late + 1);
-                    }
-                }
             }
         }
 
@@ -243,7 +195,7 @@ namespace Polyamory
                                 }
                                 character.HideShadow = true;
                             }
-                            else if (Game1.timeOfDay < 2000 && Game1.timeOfDay > 600)
+                            else if (Game1.timeOfDay < 2000 && Game1.timeOfDay >= 600)
                             {
                                 character.farmerPassesThrough = false;
                                 character.HideShadow = false;

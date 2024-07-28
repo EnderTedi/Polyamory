@@ -17,9 +17,11 @@ namespace Polyamory
         public bool ComplexDivorce { get; set; } = true;
         public int MaxChildren { get; set; } = 2;
         public bool ShowParentNames { get; set; } = false;
-        public int PercentChanceForSpouseInBed { get; set; } = 25;
-        public int PercentChanceForSpouseInKitchen { get; set; } = 25;
-        public int PercentChanceForSpouseAtPatio { get; set; } = 25;
+        public string SpouseSleepOrder { get; set; } = "";
+        public int PercentChanceForSpouseInBed { get; set; } = 20;
+        public int PercentChanceForSpouseInKitchen { get; set; } = 20;
+        public int PercentChangeForSpouseInPorch { get; set; } = 20;
+        public int PercentChanceForSpouseAtPatio { get; set; } = 20;
     }
 
     internal partial class Polyamory : Mod
@@ -48,7 +50,6 @@ namespace Polyamory
 
             I18n.Init(Helper.Translation);
             Helper.Events.Content.AssetRequested += OnAssetRequested;
-            Helper.Events.Content.AssetRequested += OnAssetRequested2;
             Helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             Helper.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
             Helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
@@ -93,7 +94,7 @@ namespace Polyamory
                prefix: new HarmonyMethod(typeof(PathFindControllerPatcher), nameof(PathFindControllerPatcher.PathFindController_Prefix))
             );
 
-            Helper.ConsoleCommands.Add("Polyamory.IsNpcPolyamorous", "Returns whether the specified NPCs are polyamorous.\nAccepts internal NPC names or \"All\" for all npcs.", (cmd, args) =>
+            Helper.ConsoleCommands.Add("Polyamory.IsNpcPolyamorous", "Returns whether the specified NPCs are polyamorous.\nAccepts internal NPC names or 'All' for all npcs.", (cmd, args) =>
             {
                 if (args.Length < 1)
                 {
@@ -131,7 +132,7 @@ namespace Polyamory
                 }
             });
 
-            Helper.ConsoleCommands.Add("Polyamory.HasChemistry", "...", (cmd, args) =>
+            Helper.ConsoleCommands.Add("Polyamory.HasChemistry", "Returns whether the specified NPCs have Positive Chemistry with each other.", (cmd, args) =>
             {
                 if (args.Length < 1)
                 {
@@ -182,17 +183,18 @@ namespace Polyamory
         {
             return Polyamory.PeopleDating(farmer);
         }
-        public bool IsValidEngagement(Farmer farmer, string npc)
-        {
-            return Polyamory.IsValidEngagement(farmer, npc);
-        }
         public bool IsValidDating(Farmer farmer, string npc)
         {
             return Polyamory.IsValidDating(farmer, npc);
         }
-        public bool HasChemistry(Farmer farmer, string npc)
+        public bool HasChemistry(Farmer farmer, string npc, string? newNpc = null)
         {
-            return Polyamory.HasChemistry(farmer, npc);
+            if (newNpc is null) return Polyamory.HasChemistry(farmer, npc);
+            else return Polyamory.HasChemistry(farmer, npc, newNpc);
+        }
+        public bool IsWithMonogamousNPC(Farmer farmer)
+        {
+            return Polyamory.IsWithMonogamousNPC(farmer);
         }
     }
 }

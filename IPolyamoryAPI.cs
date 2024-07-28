@@ -1,5 +1,5 @@
-﻿using StardewValley.Locations;
-using StardewValley;
+﻿using StardewValley;
+using StardewValley.Locations;
 
 namespace Polyamory
 {
@@ -40,15 +40,7 @@ namespace Polyamory
         List<string> PeopleDating(Farmer farmer);
 
         /// <summary>
-        /// Returns whether the specified farmer can get engaged to the specified NPC.
-        /// </summary>
-        /// <param name="farmer">Farmer to check against</param>
-        /// <param name="npc">NPC to check against</param>
-        /// <returns>Bool</returns>
-        bool IsValidEngagement(Farmer farmer, string npc);
-
-        /// <summary>
-        /// Returns whether the specified farmer can date the specified NPC.
+        /// Returns whether the specified farmer can date, marry or room with the specified NPC.
         /// </summary>
         /// <param name="farmer">Farmer to check against</param>
         /// <param name="npc">NPC to check against</param>
@@ -60,7 +52,15 @@ namespace Polyamory
         /// </summary>
         /// <param name="farmer">Farmer to check against</param>
         /// <param name="npc">NPC to check against</param>
+        /// <param name="newNpc">Extra npc the farmer isn't already dating or rooming with to check against.</param>
         /// <returns>Bool</returns>
-        bool HasChemistry(Farmer farmer, string npc);
+        bool HasChemistry(Farmer farmer, string npc, string? newNpc = null);
+
+        /// <summary>
+        /// Returns whether the specified farmer is currently dating, married or rooming with a monogamous npc.
+        /// </summary>
+        /// <param name="farmer">Farmer to check against</param>
+        /// <returns>Bool</returns>
+        public bool IsWithMonogamousNPC(Farmer farmer);
     }
 }

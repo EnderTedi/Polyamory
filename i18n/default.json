@@ -1,10 +1,12 @@
 {
   "PlayerMarriage.MarriedToNonPolyamorousNPC": "You or the farmer you are attempting to marry is currently married to a monogamous NPC.",
 
-  "Marriage.NonPolyamorousNPC": "My answer is no.#$b#Your partner wouldn't be alright with this.$3",
-  "Marriage.IsNonPolyamorousNPC": "I can't. I'm not polyamorous like you, and you're already married to someone else.$3",
-  "Dating.NonPolyamorousNPC": "Sorry, I'm not comfortable dating you right now...$3#$b#$SpouseName$ is monogamous, it just wouldn't be right.",
-  "Dating.IsNonPolyamorousNPC": "I can't accept this.$1#$b#I'm monogamous... and you're already taken.$3",
+  "RejectBouquet.IsMonogamous.PlayerWithOtherPeople": "But you're with someone else... I'm just not comfortable with that.$2",
+  "RejectBouquet.IsPolyamorous.PlayerWithSomeoneMonogamous": "I'm sorry but I'm going to have to reject you.$2#$b#You're with {0}, and they don't seem like the type to be polyamorous.",
+  "RejectMermaidPendant.IsMonogamous.PlayerWithOtherPeople": "I can't marry you, you're already with someone else, and I'm not into that...$2",
+  "RejectMermaidPendant.IsPolyamorous.PlayerWithSomeoneMonogamous": "No, my answer is no. Your partner is monogamous, how could you even think to ask me...?$2",
+  "RejectRoommateProposal.IsMonogamous.PlayerWithOtherPeople": "I'm not quite comfortable rooming with you and {0}. Sorry...$2",
+  "RejectRoommateProposal.IsPolyamorous.PlayerWithSomeoneMonogamous": "I'm not sure {0} would quite enjoy a roommate.$2",
 
   "Config.Section.Pendant": "Mermaid's Pendant",
   "Config.BuyPendantsAnytime.Name": "Buy Pendants Anytime",
@@ -26,11 +28,13 @@
 
   "Config.Section.Spouse": "Spouse",
   "Config.PercentChanceForSpouseInBed.Name": "Bed Chance",
-  "Config.PercentChanceForSpouseInBed.Description": "The chance for each spouse to stay in bed on day start.\nDefault: 25",
+  "Config.PercentChanceForSpouseInBed.Description": "The chance for a spouse to stay in bed on day start.\nDefault: 20",
   "Config.PercentChanceForSpouseInKitchen.Name": "Kitchen Chance",
-  "Config.PercentChanceForSpouseInKitchen.Description": "The chance for each spouse to spawn in the kitchen on day start.\nDefault: 25",
+  "Config.PercentChanceForSpouseInKitchen.Description": "The chance for a spouse to spawn in the kitchen on day start.\nDefault: 20",
+  "Config.PercentChanceForSpouseInPorch.Name": "Porch Chance",
+  "Config.PercentChanceForSpouseInPorch.Description": "The chance for a spouse to spawn in the porch on day start.\nDefault: 20",
   "Config.PercentChanceForSpouseAtPatio.Name": "Patio Chance",
-  "Config.PercentChanceForSpouseAtPatio.Description": "The chance for each spouse to spawn in the spouse patio on day start.\nDefault: 25",
+  "Config.PercentChanceForSpouseAtPatio.Description": "The chance for a spouse to spawn in the spouse patio on day start.\nDefault: 20",
 
   "divorce_who": "Who would you like to divorce?",
   "divorce_complex": "It's complicated...",

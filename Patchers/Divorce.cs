@@ -31,7 +31,6 @@ namespace Polyamory.Patchers
 
             if (Polyamory.GetSpouses(who, true).ContainsKey(whichAnswer))
             {
-                monitor.Log("Test 1", LogLevel.Error);
                 monitor.Log("divorcing " + whichAnswer);
                 string s2 = Game1.content.LoadString("Strings\\Locations:ManorHouse_DivorceBook_Question_" + whichAnswer, whichAnswer);
                 if (s2 == null || s2 == "Strings\\Locations:ManorHouse_DivorceBook_Question_" + whichAnswer)
@@ -54,7 +53,6 @@ namespace Polyamory.Patchers
             }
             else if (whichAnswer.StartsWith("divorce_Yes_"))
             {
-                monitor.Log("Test 2", LogLevel.Error);
                 monitor.Log("confirmed " + whichAnswer);
                 string spouse = whichAnswer.Split('_')[2];
                 if (Game1.player.Money >= 50000 || spouse == "Krobus")
@@ -93,40 +91,37 @@ namespace Polyamory.Patchers
             }
             else if (whichAnswer.StartsWith("divorce_complex_"))
             {
-                monitor.Log("Test 3", LogLevel.Error);
                 complexDivorceSpouse = whichAnswer.Replace("divorce_complex_", "");
                 Polyamory.divorceHeartsLost = 1;
                 ShowNextDialogue("divorce_fault_", Game1.currentLocation);
             }
             else if (whichAnswer.StartsWith("divorce_fault_"))
             {
-                monitor.Log("Test 4", LogLevel.Error);
                 monitor.Log("divorce fault");
                 string r = helper.Translation.Get(whichAnswer);
                 if (r != null)
                 {
-                    if (int.TryParse(r.Split('#')[r.Split('#').Length - 1], out int lost))
+                    if (int.TryParse(r.Split('#')[^1], out int lost))
                     {
                         Polyamory.divorceHeartsLost += lost;
                     }
                 }
-                string nextKey = $"divorce_{r.Split('#')[r.Split('#').Length - 2]}reason_";
+                string nextKey = $"divorce_{r?.Split('#')[^2]}reason_";
                 Translation test = helper.Translation.Get(nextKey + "q");
                 if (!test.HasValue())
                 {
                     ShowNextDialogue($"divorce_method_", Game1.currentLocation);
                     return;
                 }
-                ShowNextDialogue($"divorce_{r.Split('#')[r.Split('#').Length - 2]}reason_", Game1.currentLocation);
+                ShowNextDialogue($"divorce_{r?.Split('#')[^2]}reason_", Game1.currentLocation);
             }
             else if (whichAnswer.Contains("reason_"))
             {
-                monitor.Log("Test 4", LogLevel.Error);
                 monitor.Log("divorce reason");
                 string r = helper.Translation.Get(whichAnswer);
                 if (r != null)
                 {
-                    if (int.TryParse(r.Split('#')[r.Split('#').Length - 1], out int lost))
+                    if (int.TryParse(r.Split('#')[^1], out int lost))
                     {
                         Polyamory.divorceHeartsLost += lost;
                     }
@@ -136,13 +131,12 @@ namespace Polyamory.Patchers
             }
             else if (whichAnswer.StartsWith("divorce_method_"))
             {
-                monitor.Log("Test 2", LogLevel.Error);
                 monitor.Log("divorce method");
                 Polyamory.spouseToDivorce = complexDivorceSpouse;
                 string r = helper.Translation.Get(whichAnswer);
                 if (r != null)
                 {
-                    if (int.TryParse(r.Split('#')[r.Split('#').Length - 1], out int lost))
+                    if (int.TryParse(r.Split('#')[^1], out int lost))
                     {
                         Polyamory.divorceHeartsLost += lost;
                     }
@@ -153,7 +147,7 @@ namespace Polyamory.Patchers
                     if (!Game1.player.isRoommate(complexDivorceSpouse))
                     {
                         int money = 50000;
-                        if (int.TryParse(r.Split('#')[r.Split('#').Length - 2], out int mult))
+                        if (int.TryParse(r?.Split('#')[^2], out int mult))
                         {
                             money = (int)Math.Round(money * mult / 100f);
                         }
@@ -185,7 +179,6 @@ namespace Polyamory.Patchers
 
         private static void ShowNextDialogue(string key, GameLocation l)
         {
-            monitor.Log("did i make it here?", LogLevel.Error);
             (Game1.activeClickableMenu as DialogueBox)?.closeDialogue();
             Translation s2 = helper.Translation.Get($"{key}q");
             if (!s2.HasValue())
@@ -198,7 +191,6 @@ namespace Polyamory.Patchers
             int i = 1;
             while (true)
             {
-                monitor.Log("am i in the while loop?", LogLevel.Error);
                 Translation r = helper.Translation.Get($"{key}{i}");
                 if (!r.HasValue())
                     break;
@@ -208,13 +200,11 @@ namespace Polyamory.Patchers
                 responses.Add(new Response(key + i, str));
                 i++;
             }
-            monitor.Log("Ok i made it out of the while loop", LogLevel.Error);
             monitor.Log("next question: " + s2.ToString());
             Game1.currentLocation.lastQuestionKey = "";
             Game1.isQuestion = true;
             Game1.dialogueUp = true;
             l.createQuestionDialogue(s2, responses.ToArray(), "PolyamoryDivorce");
-            monitor.Log("Attempted to make diaogue question", LogLevel.Error);
         }
     }
 }
