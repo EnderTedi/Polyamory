@@ -120,10 +120,14 @@ namespace Polyamory.Patchers
                         {
                             if (!probe)
                             {
+#if !RELEASE
                                 monitor.Log($"Try give pendant to {__instance.Name}");
+#endif
                                 if (who.isEngaged())
                                 {
+#if !RELEASE
                                     monitor.Log($"Tried to give pendant while engaged");
+#endif
 
                                     __instance.CurrentDialogue.Push(new Dialogue(__instance, "Strings\\StringsFromCSFiles:NPC.cs." + Game1.random.Choose("3965", "3966"), true));
                                     Game1.drawDialogue(__instance);
@@ -132,8 +136,9 @@ namespace Polyamory.Patchers
                                 }
                                 if (!__instance.datable.Value || __instance.isMarriedOrEngaged() || (who.friendshipData.ContainsKey(__instance.Name) && who.friendshipData[__instance.Name].Points < 2500f * 0.6f))
                                 {
+#if !RELEASE
                                     monitor.Log($"Tried to give pendant to someone not datable");
-
+#endif
                                     if (Polyamory.random.NextDouble() < 0.5)
                                     {
                                         Game1.drawObjectDialogue(Game1.content.LoadString("Strings\\StringsFromCSFiles:NPC.cs.3969", __instance.displayName));
@@ -147,8 +152,9 @@ namespace Polyamory.Patchers
                                 }
                                 else if (__instance.datable.Value && who.friendshipData.ContainsKey(__instance.Name) && who.friendshipData[__instance.Name].Points < 2500f)
                                 {
+#if !RELEASE
                                     monitor.Log($"Tried to give pendant to someone not marriable");
-
+#endif
                                     if (!who.friendshipData[__instance.Name].ProposalRejected)
                                     {
                                         __instance.CurrentDialogue.Push(new Dialogue(__instance, "Strings\\StringsFromCSFiles:NPC.cs." + Game1.random.Choose("3972", "3973"), false));
@@ -166,17 +172,23 @@ namespace Polyamory.Patchers
                                 }
                                 else
                                 {
+#if !RELEASE
                                     monitor.Log($"Tried to give pendant to someone marriable");
+#endif
                                     if (__instance.datable.Value && who.HouseUpgradeLevel >= 1 && Polyamory.IsValidDating(who, __instance.Name))
                                     {
+#if !RELEASE
                                         monitor.Log($"{__instance.Name} is getting married");
+#endif
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                                         typeof(NPC).GetMethod("engagementResponse", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { who, false });
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
                                         __result = true;
                                         return false;
                                     }
+#if !RELEASE
                                     monitor.Log($"Can't marry");
+#endif
                                     if (Polyamory.random.NextDouble() < 0.5)
                                     {
                                         Game1.drawObjectDialogue(Game1.content.LoadString("Strings\\StringsFromCSFiles:NPC.cs.3969", __instance.displayName));
@@ -485,13 +497,17 @@ namespace Polyamory.Patchers
 
                     if ((__instance.Name.Equals(who.spouse) || Polyamory.GetSpouses(who, true).ContainsKey(__instance.Name)) && __instance.Sprite.CurrentAnimation == null && who.IsLocalPlayer)
                     {
+#if !RELEASE
                         monitor.Log($"{__instance.Name} is married to {who.Name}");
+#endif
 
                         __instance.faceDirection(-3);
 
                         if (who.friendshipData.ContainsKey(__instance.Name) && who.friendshipData[__instance.Name].Points >= 3125 && who.mailReceived.Add("CF_Spouse"))
                         {
+#if !RELEASE
                             monitor.Log($"getting starfruit");
+#endif
                             __instance.CurrentDialogue.Push(new Dialogue(__instance, Game1.player.isRoommate(who.spouse) ? "Strings\\StringsFromCSFiles:Krobus_Stardrop" : "Strings\\StringsFromCSFiles:NPC.cs.4001", false));
                             Object stardrop = ItemRegistry.Create<Object>("(O)434", 1, 0, false);
                             stardrop.CanBeSetDown = false;
@@ -504,7 +520,9 @@ namespace Polyamory.Patchers
                         }
                         if (__instance.Sprite.CurrentAnimation == null && !__instance.hasTemporaryMessageAvailable() && __instance.currentMarriageDialogue.Count == 0 && __instance.CurrentDialogue.Count == 0 && Game1.timeOfDay < 2200 && !__instance.isMoving() && who.ActiveObject == null /*&& Polyamory.kissingAPI == null*/)
                         {
+#if !RELEASE
                             monitor.Log($"Trying to kiss/hug {__instance.Name}");
+#endif
 
                             __instance.faceGeneralDirection(who.getStandingPosition(), 0, false);
                             who.faceGeneralDirection(__instance.getStandingPosition(), 0, false);
@@ -513,7 +531,9 @@ namespace Polyamory.Patchers
 
                                 if (__instance.hasBeenKissedToday.Value)
                                 {
+#if !RELEASE
                                     monitor.Log($"{__instance.Name} has been kissed today");
+#endif
                                     return true;
                                 }
 
@@ -523,7 +543,9 @@ namespace Polyamory.Patchers
                                 bool flip = (facingRight && __instance.FacingDirection == 3) || (!facingRight && __instance.FacingDirection == 1);
                                 if (who.getFriendshipHeartLevelForNPC(__instance.Name) >= 9)
                                 {
+#if !RELEASE
                                     monitor.Log($"Can kiss/hug {__instance.Name}");
+#endif
 
                                     int delay = Game1.IsMultiplayer ? 1000 : 10;
                                     __instance.movementPause = delay;
@@ -536,7 +558,9 @@ namespace Polyamory.Patchers
                                         who.changeFriendship(10, __instance);
                                         if (who.friendshipData[__instance.Name].RoommateMarriage)
                                         {
+#if !RELEASE
                                             monitor.Log($"Hugging {__instance.Name}");
+#endif
                                             Game1.Multiplayer.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite[]
                                             {
                                             new("LooseSprites\\emojis", new Rectangle(0, 0, 9, 9), 2000f, 1, 0, new Vector2(__instance.Tile.X, __instance.Tile.Y) * 64f + new Vector2(16f, -64f), false, false, 1f, 0f, Color.White, 4f, 0f, 0f, 0f, false)
@@ -548,7 +572,9 @@ namespace Polyamory.Patchers
                                         }
                                         else
                                         {
+#if !RELEASE
                                             monitor.Log($"Kissing {__instance.Name}");
+#endif
                                             Game1.Multiplayer.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite[]
                                             {
                                             new("LooseSprites\\Cursors", new Rectangle(211, 428, 7, 6), 2000f, 1, 0, new Vector2(__instance.Tile.X, __instance.Tile.Y) * 64f + new Vector2(16f, -64f), false, false, 1f, 0f, Color.White, 4f, 0f, 0f, 0f, false)
@@ -567,7 +593,9 @@ namespace Polyamory.Patchers
                                 }
                                 else
                                 {
+#if !RELEASE
                                     monitor.Log($"Kiss/hug rejected by {__instance.Name}");
+#endif
 
                                     __instance.faceDirection((Polyamory.random.NextDouble() < 0.5) ? 2 : 0);
                                     __instance.doEmote(12, true);

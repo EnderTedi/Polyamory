@@ -2,13 +2,8 @@
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection.Emit;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Polyamory.Patchers
 {
@@ -55,7 +50,9 @@ namespace Polyamory.Patchers
                 List<CodeInstruction> codes = instructions.ToList();
                 if (helper.ModRegistry.IsLoaded("SG.Partners"))
                 {
+#if !RELEASE
                     monitor.Log("Keep Your Partners mod is loaded, not patching social page.");
+#endif
                     return codes.AsEnumerable();
                 }
                 try
@@ -85,7 +82,9 @@ namespace Polyamory.Patchers
                 List<CodeInstruction> codes = instructions.ToList();
                 if (helper.ModRegistry.IsLoaded("SG.Partners"))
                 {
+#if !RELEASE
                     monitor.Log("Keep Your Partners mod is loaded, not patching social page.");
+#endif
                     return codes.AsEnumerable();
                 }
                 try

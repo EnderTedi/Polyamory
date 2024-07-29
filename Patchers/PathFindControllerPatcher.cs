@@ -42,7 +42,9 @@ namespace Polyamory.Patchers
                     }
                     else
                     {
+#if !RELEASE
                         endPoint = point;
+#endif
                         monitor.Log($"Moved {c.Name} bed endpoint to {endPoint}");
                     }
                 }
@@ -54,7 +56,9 @@ namespace Polyamory.Patchers
                     if (point != Point.Zero)
                     {
                         endPoint = point;
+#if !RELEASE
                         monitor.Log($"Moved {c.Name} endpoint to random point {endPoint}");
+#endif
                     }
                 }
             }
@@ -66,8 +70,9 @@ namespace Polyamory.Patchers
 
         private static bool IsColliding(Character c, GameLocation location, Point endPoint)
         {
-
+#if !RELEASE
             monitor.Log($"Checking {c.Name} endpoint in farmhouse");
+#endif
             using IEnumerator<Character> characters = location.characters.GetEnumerator();
             while (characters.MoveNext())
             {
@@ -77,7 +82,9 @@ namespace Polyamory.Patchers
                     if (characters.Current.TilePoint == endPoint || (characters.Current is NPC && (characters.Current as NPC).controller?.endPoint == endPoint))
 #pragma warning restore CS8602
                     {
+#if !RELEASE
                         monitor.Log($"{c.Name} endpoint {endPoint} collides with {characters.Current.Name}");
+#endif
                         return true;
                     }
                 }

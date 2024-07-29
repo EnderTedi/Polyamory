@@ -218,11 +218,15 @@ namespace Polyamory.Patchers
             {
                 try
                 {
+#if !RELEASE
                     monitor.Log("Trying to divorce");
+#endif
                     __instance.divorceTonight.Value = false;
                     if (!__instance.isMarriedOrRoommates() || Polyamory.spouseToDivorce == null)
                     {
+#if !RELEASE
                         monitor.Log("Tried to divorce but no spouse to divorce!");
+#endif
                         return false;
                     }
 
@@ -240,12 +244,18 @@ namespace Polyamory.Patchers
 
                     if (__instance.friendshipData.ContainsKey(key))
                     {
+#if !RELEASE
                         monitor.Log($"Divorcing {key}");
+#endif
                         __instance.friendshipData[key].Points = Math.Min(2000, Math.Max(0, points));
+#if !RELEASE
                         monitor.Log($"Resulting points: {__instance.friendshipData[key].Points}");
+#endif
 
                         __instance.friendshipData[key].Status = points < 1000 ? FriendshipStatus.Divorced : FriendshipStatus.Friendly;
+#if !RELEASE
                         monitor.Log($"Resulting friendship status: {__instance.friendshipData[key].Status}");
+#endif
 
                         __instance.friendshipData[key].RoommateMarriage = false;
 
@@ -260,8 +270,9 @@ namespace Polyamory.Patchers
                         Polyamory.ResetSpouses(__instance);
                         helper.GameContent.InvalidateCache("Maps/FarmHouse1_marriage");
                         helper.GameContent.InvalidateCache("Maps/FarmHouse2_marriage");
-
+#if !RELEASE
                         monitor.Log($"New spouse: {__instance.spouse}, married {__instance.isMarriedOrRoommates()}");
+#endif
 
                         Utility.getHomeOfFarmer(__instance).showSpouseRoom();
                         Utility.getHomeOfFarmer(__instance).setWallpapers();

@@ -116,7 +116,9 @@ namespace Polyamory
                 var spouses = GetSpouses(f, true).Keys;
                 foreach (string s in spouses)
                 {
+#if !RELEASE
                     monitor.Log($"{f.Name} is married to {s}");
+#endif
                 }
             }
         }

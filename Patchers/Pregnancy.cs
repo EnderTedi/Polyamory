@@ -14,7 +14,9 @@ namespace Polyamory.Patchers
     {
 
 #pragma warning disable CS8618
+#if !RELEASE
         private static IMonitor monitor;
+#endif
         private static ModConfig config;
 #pragma warning restore CS8618
         public static NPC? lastPregnantSpouse;
@@ -22,7 +24,9 @@ namespace Polyamory.Patchers
 
         internal static void Initialize(IMonitor Monitor, ModConfig Config)
         {
+#if !RELEASE
             monitor = Monitor;
+#endif
             config = Config;
         }
 
@@ -41,7 +45,9 @@ namespace Polyamory.Patchers
         {
             public static bool Prefix(ref FarmEvent? __result)
             {
+#if !RELEASE
                 monitor.Log("picking event");
+#endif
                 if (Game1.weddingToday)
                 {
                     __result = null;
@@ -58,7 +64,9 @@ namespace Polyamory.Patchers
                 {
                     if (spouse == null)
                     {
+#if !RELEASE
                         monitor.Log($"Utility_pickPersonalFarmEvent_Prefix spouse is null");
+#endif
                         continue;
                     }
                     Farmer f = spouse.getSpouse();
@@ -76,7 +84,9 @@ namespace Polyamory.Patchers
 
                 /*if (plannedParenthoodAPI is not null && plannedParenthoodAPI.GetPartnerTonight() is not null)
                 {
-                    SMonitor.Log($"Handing farm sleep event off to Planned Parenthood");
+#if !RELEASE
+                    monitor.Log($"Handing farm sleep event off to Planned Parenthood");
+#endif
                     return true;
                 }*/
 
@@ -98,10 +108,14 @@ namespace Polyamory.Patchers
                     int maxChildren = config.MaxChildren;
                     FarmHouse fh = Utility.getHomeOfFarmer(f);
                     bool can = spouse.daysAfterLastBirth <= 0 && fh.cribStyle.Value > 0 && fh.upgradeLevel >= 2 && friendship.DaysUntilBirthing < 0 && heartsWithSpouse >= 10 && friendship.DaysMarried >= 7 && kids.Count < maxChildren;
+#if !RELEASE
                     monitor.Log($"Checking ability to get pregnant: {spouse.Name} {can}:{(fh.cribStyle.Value > 0 ? $" no crib" : "")}{(Utility.getHomeOfFarmer(f).upgradeLevel < 2 ? $" house level too low {Utility.getHomeOfFarmer(f).upgradeLevel}" : "")}{(friendship.DaysMarried < 7 ? $", not married long enough {friendship.DaysMarried}" : "")}{(friendship.DaysUntilBirthing >= 0 ? $", already pregnant (gives birth in: {friendship.DaysUntilBirthing})" : "")}");
+#endif
                     if (can && Game1.player.currentLocation == Game1.getLocationFromName(Game1.player.homeLocation.Value) && Polyamory.random.NextDouble() < 0.05)
                     {
+#if !RELEASE
                         monitor.Log("Requesting a baby!");
+#endif
                         lastPregnantSpouse = spouse;
                         __result = new QuestionEvent(1);
                         return false;

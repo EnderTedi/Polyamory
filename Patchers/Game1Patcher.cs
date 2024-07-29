@@ -1,6 +1,4 @@
-﻿using HarmonyLib;
-using StardewModdingAPI;
-using StardewValley;
+﻿using StardewModdingAPI;
 namespace Polyamory.Patchers
 {
     internal class Game1Patcher

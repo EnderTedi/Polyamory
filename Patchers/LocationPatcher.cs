@@ -163,7 +163,9 @@ namespace Polyamory.Patchers
 #pragma warning restore IDE0057 // Use range operator
                             if (Game1.player.spouse != name && spouses.ContainsKey(name))
                             {
+#if !RELEASE
                                 monitor.Log($"Got unofficial spouse requirement for event: {name}, switching event condition to isSpouse O");
+#endif
                                 split[i] = $"o {name}";
                             }
                         }
@@ -174,7 +176,9 @@ namespace Polyamory.Patchers
 #pragma warning restore IDE0057 // Use range operator
                             if (Game1.player.spouse != name && spouses.ContainsKey(name))
                             {
+#if !RELEASE
                                 monitor.Log($"Got unofficial spouse barrier to event: {name}, switching event condition to notSpouse o");
+#endif
                                 split[i] = $"O {name}";
                             }
                         }
@@ -210,7 +214,6 @@ namespace Polyamory.Patchers
                                 }
                                 responses.Add(new Response("No", Game1.content.LoadString("Strings\\Lexicon:QuestionDialogue_No")));
                                 __instance.createQuestionDialogue(str, responses.ToArray(), "PolyamoryDivorce");
-                                //__instance.createQuestionDialogue(s2, responses.ToArray(), "divorce");
                                 __result = true;
                                 return false;
                         }

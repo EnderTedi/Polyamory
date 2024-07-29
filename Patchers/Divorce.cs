@@ -27,11 +27,14 @@ namespace Polyamory.Patchers
 
         public static void AfterDialogueBehavior(Farmer who, string whichAnswer)
         {
+#if !RELEASE
             monitor.Log("answer " + whichAnswer);
-
+#endif
             if (Polyamory.GetSpouses(who, true).ContainsKey(whichAnswer))
             {
+#if !RELEASE
                 monitor.Log("divorcing " + whichAnswer);
+#endif
                 string s2 = Game1.content.LoadString("Strings\\Locations:ManorHouse_DivorceBook_Question_" + whichAnswer, whichAnswer);
                 if (s2 == null || s2 == "Strings\\Locations:ManorHouse_DivorceBook_Question_" + whichAnswer)
                 {
@@ -53,11 +56,15 @@ namespace Polyamory.Patchers
             }
             else if (whichAnswer.StartsWith("divorce_Yes_"))
             {
+#if !RELEASE
                 monitor.Log("confirmed " + whichAnswer);
+#endif
                 string spouse = whichAnswer.Split('_')[2];
                 if (Game1.player.Money >= 50000 || spouse == "Krobus")
                 {
+#if !RELEASE
                     monitor.Log("divorce initiated successfully");
+#endif
                     if (!Game1.player.isRoommate(spouse))
                     {
                         Game1.player.Money -= 50000;
@@ -85,7 +92,9 @@ namespace Polyamory.Patchers
                 }
                 else
                 {
+#if !RELEASE
                     monitor.Log("not enough money to divorce");
+#endif
                     Game1.drawObjectDialogue(Game1.content.LoadString("Strings\\UI:NotEnoughMoney1"));
                 }
             }
@@ -97,7 +106,9 @@ namespace Polyamory.Patchers
             }
             else if (whichAnswer.StartsWith("divorce_fault_"))
             {
+#if !RELEASE
                 monitor.Log("divorce fault");
+#endif
                 string r = helper.Translation.Get(whichAnswer);
                 if (r != null)
                 {
@@ -117,7 +128,9 @@ namespace Polyamory.Patchers
             }
             else if (whichAnswer.Contains("reason_"))
             {
+#if !RELEASE
                 monitor.Log("divorce reason");
+#endif
                 string r = helper.Translation.Get(whichAnswer);
                 if (r != null)
                 {
@@ -131,7 +144,9 @@ namespace Polyamory.Patchers
             }
             else if (whichAnswer.StartsWith("divorce_method_"))
             {
+#if !RELEASE
                 monitor.Log("divorce method");
+#endif
                 Polyamory.spouseToDivorce = complexDivorceSpouse;
                 string r = helper.Translation.Get(whichAnswer);
                 if (r != null)
@@ -151,7 +166,9 @@ namespace Polyamory.Patchers
                         {
                             money = (int)Math.Round(money * mult / 100f);
                         }
+#if !RELEASE
                         monitor.Log($"money cost {money}");
+#endif
                         Game1.player.Money -= 50000;
                     }
                     Game1.player.divorceTonight.Value = true;
@@ -168,7 +185,9 @@ namespace Polyamory.Patchers
                                     Game1.player.Name
                         });
                     }
+#if !RELEASE
                     monitor.Log($"hearts lost {Polyamory.divorceHeartsLost}");
+#endif
                 }
                 else
                 {
@@ -183,10 +202,14 @@ namespace Polyamory.Patchers
             Translation s2 = helper.Translation.Get($"{key}q");
             if (!s2.HasValue())
             {
+#if !RELEASE
                 monitor.Log("no dialogue: " + s2.ToString(), LogLevel.Error);
+#endif
                 return;
             }
+#if !RELEASE
             monitor.Log("has dialogue: " + s2.ToString());
+#endif
             List<Response> responses = new();
             int i = 1;
             while (true)
@@ -195,12 +218,15 @@ namespace Polyamory.Patchers
                 if (!r.HasValue())
                     break;
                 string str = r.ToString().Split('#')[0];
+#if !RELEASE
                 monitor.Log(str);
-
+#endif
                 responses.Add(new Response(key + i, str));
                 i++;
             }
+#if !RELEASE
             monitor.Log("next question: " + s2.ToString());
+#endif
             Game1.currentLocation.lastQuestionKey = "";
             Game1.isQuestion = true;
             Game1.dialogueUp = true;

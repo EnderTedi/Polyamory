@@ -24,11 +24,8 @@ namespace Polyamory
             foreach (string npc in Game1.characterData.Keys)
             {
                 if (currNpc is not null && npc == currNpc) continue;
-
-                monitor.Log($"checking {npc}");
                 farmer.friendshipData.TryGetValue(npc, out var friendship);
                 if (friendship is null) continue;
-                monitor.Log($"{npc}, {friendship.Status}");
                 if (friendship.Status is not FriendshipStatus.Friendly && friendship.Status is not FriendshipStatus.Divorced)
                 {
                     IsDating = true;
@@ -140,7 +137,9 @@ namespace Polyamory
                     Spouses[farmer.UniqueMultiplayerID][ospouse] = npc;
                 }
             }
+#if !RELEASE
             monitor.Log($"Checking for extra spouses in {farmer.friendshipData.Count()} friends");
+#endif
             foreach (string friend in farmer.friendshipData.Keys)
             {
                 if (farmer.friendshipData[friend].IsMarried() && friend != farmer.spouse)
@@ -155,7 +154,9 @@ namespace Polyamory
             }
             if (farmer.spouse is null && Spouses[farmer.UniqueMultiplayerID].Any())
                 farmer.spouse = Spouses[farmer.UniqueMultiplayerID].First().Key;
+#if !RELEASE
             monitor.Log($"reloaded {Spouses[farmer.UniqueMultiplayerID].Count} spouses for {farmer.Name} {farmer.UniqueMultiplayerID}");
+#endif
         }
 
         public static void ResetSpouses(Farmer farmer, bool force = false)
@@ -170,7 +171,9 @@ namespace Polyamory
             {
                 if (spouses.Count > 0)
                 {
+#if !RELEASE
                     monitor.Log("No official spouse, setting official spouse to: " + spouses.First().Key);
+#endif
                     farmer.spouse = spouses.First().Key;
                 }
             }
@@ -179,29 +182,41 @@ namespace Polyamory
             {
                 if (farmer.friendshipData[name].IsEngaged())
                 {
+#if !RELEASE
                     monitor.Log($"{farmer.Name} is engaged to: {name} {farmer.friendshipData[name].CountdownToWedding} days until wedding");
+#endif
                     if (farmer.friendshipData[name].WeddingDate.TotalDays < new WorldDate(Game1.Date).TotalDays)
                     {
+#if !RELEASE
                         monitor.Log("invalid engagement: " + name);
+#endif
                         farmer.friendshipData[name].WeddingDate.TotalDays = new WorldDate(Game1.Date).TotalDays + 1;
                     }
                     if (farmer.spouse != name)
                     {
+#if !RELEASE
                         monitor.Log("setting spouse to engagee: " + name);
+#endif
                         farmer.spouse = name;
                     }
                 }
                 if (farmer.friendshipData[name].IsMarried() && farmer.spouse != name)
                 {
-                    //monitor.Log($"{f.Name} is married to: {name}");
+#if !RELEASE
+                    monitor.Log($"{f.Name} is married to: {name}");
+#endif
                     if (farmer.spouse != null && farmer.friendshipData[farmer.spouse] != null && !farmer.friendshipData[farmer.spouse].IsMarried() && !farmer.friendshipData[farmer.spouse].IsEngaged())
                     {
+#if !RELEASE
                         monitor.Log("invalid ospouse, setting ospouse to " + name);
+#endif
                         farmer.spouse = name;
                     }
                     if (farmer.spouse == null)
                     {
+#if !RELEASE
                         monitor.Log("null ospouse, setting ospouse to " + name);
+#endif
                         farmer.spouse = name;
                     }
                 }
@@ -218,7 +233,9 @@ namespace Polyamory
             {
                 if (Game1.player.friendshipData[f].Status == FriendshipStatus.Divorced)
                 {
+#if !RELEASE
                     monitor.Log($"Wiping divorce for {f}");
+#endif
                     if (Game1.player.friendshipData[f].Points < 8 * 250)
                         Game1.player.friendshipData[f].Status = FriendshipStatus.Friendly;
                     else
@@ -247,7 +264,9 @@ namespace Polyamory
 
             if (allSpouses.Count == 0)
             {
+#if !RELEASE
                 monitor.Log("no spouses");
+#endif
                 return;
             }
 
@@ -273,36 +292,47 @@ namespace Polyamory
                 }
                 if (!farmHouse.Equals(spouse.currentLocation))
                 {
+#if !RELEASE
                     monitor.Log($"{spouse.Name} is not in farm house ({spouse.currentLocation.Name})");
+#endif
                     continue;
                 }
                 int type = random.Next(0, 100);
 
+#if !RELEASE
                 monitor.Log($"spouse rand {type}, bed: {Config.PercentChanceForSpouseInBed} kitchen {Config.PercentChanceForSpouseInKitchen}");
+#endif
 
                 if (BedSpouses.Count <= MathF.Ceiling(Spouses.Count / 4) && (!farmer.friendshipData[spouse.Name].IsRoommate()) && HasSleepingAnimation(spouse.Name) && type < Config.PercentChanceForSpouseInBed)
                 {
+#if !RELEASE
                     monitor.Log("made bed spouse: " + spouse.Name);
+#endif
                     BedSpouses.Add(spouse.Name);
                 }
                 else if (KitchenSpouse is null && type < Config.PercentChanceForSpouseInBed + Config.PercentChanceForSpouseInKitchen)
                 {
+#if !RELEASE
                     monitor.Log("made kitchen spouse: " + spouse.Name);
+#endif
                     KitchenSpouse = spouse.Name;
                 }
                 else if (PorchSpouse is null && PatioSpouse is null && type < Config.PercentChanceForSpouseInBed + Config.PercentChanceForSpouseInKitchen + Config.PercentChangeForSpouseInPorch)
                 {
+#if !RELEASE
                     monitor.Log("made porch spouse: " + spouse.Name);
+#endif
                     PorchSpouse = spouse.Name;
                 }
                 else if (type < Config.PercentChanceForSpouseInBed + Config.PercentChanceForSpouseInKitchen + Config.PercentChangeForSpouseInPorch + Config.PercentChanceForSpouseAtPatio)
                 {
                     if (PatioSpouse is null && PorchSpouse is null && !Game1.isRaining && !Game1.IsWinter && !Game1.shortDayNameFromDayOfSeason(Game1.dayOfMonth).Equals("Sat") && !spouse.Name.Equals("Krobus") && spouse.Schedule == null)
                     {
+#if !RELEASE
                         monitor.Log("made patio spouse: " + spouse.Name);
+#endif
                         spouse.setUpForOutdoorPatioActivity();
                         PatioSpouse = spouse.Name;
-                        monitor.Log($"{spouse.Name} at {spouse.currentLocation.Name} {spouse.TilePoint}");
                     }
                 }
             }
@@ -324,15 +354,18 @@ namespace Polyamory
                 if (PatioSpouse == spouse.Name) continue;
                 if (BedSpouses is not null && BedSpouses.Contains(spouse.Name))
                 {
-                    monitor.Log($"{spouse.displayName.ToUpper()} IS A BED SPOUSE", StardewModdingAPI.LogLevel.Error);
+#if !RELEASE
                     monitor.Log("Placing bed spouses");
+#endif
                     Vector2 bedSpot = GetSpouseBedPosition(farmHouse, spouse.Name) / 64f;
                     spouse.setTileLocation(bedSpot);
                     BedSpouses.Remove(spouse.Name);
                 }
                 else if (KitchenSpouse is not null && KitchenSpouse == spouse.Name)
                 {
+#if !RELEASE
                     monitor.Log("Placing kitchen spouse");
+#endif
                     Point KitchenSpot = farmHouse.getKitchenStandingSpot();
                     spouse.setTilePosition(KitchenSpot);
                     spouse.setRandomAfternoonMarriageDialogue(Game1.timeOfDay, farmHouse, false);
@@ -340,7 +373,9 @@ namespace Polyamory
                 }
                 else if (PorchSpouse is not null && PorchSpouse == spouse.Name)
                 {
+#if !RELEASE
                     monitor.Log("Placing porch spouse");
+#endif
                     Point PorchSpot = farmHouse.getPorchStandingSpot();
                     Game1.warpCharacter(spouse, "Farm", PorchSpot);
                     spouse.faceDirection(2);
@@ -348,13 +383,17 @@ namespace Polyamory
                 }
                 else if (SpouseRoomSpot.X > -1 && !IsTileOccupied(farmHouse, SpouseRoomSpot, spouse.Name))
                 {
+#if !RELEASE
                     monitor.Log($"Placing spouse room spouse");
+#endif
                     spouse.setTilePosition(SpouseRoomSpot);
                     spouse.setSpouseRoomMarriageDialogue();
                 }
                 else
                 {
+#if !RELEASE
                     monitor.Log("Placing other spouses");
+#endif
                     Point RandomSpot = farmHouse.getRandomOpenPointInHouse(random);
                     int i = 0;
                     while (i < 100 && RandomSpot == Point.Zero)
@@ -363,7 +402,9 @@ namespace Polyamory
                     }
                     if (RandomSpot == Point.Zero)
                     {
+#if !RELEASE
                         monitor.Log("Placing bed spouses");
+#endif
                         Vector2 bedSpot = GetSpouseBedPosition(farmHouse, spouse.Name) / 64f;
                         spouse.setTileLocation(bedSpot);
                         continue;
@@ -376,7 +417,7 @@ namespace Polyamory
             }
         }
 
-        private static string SleepAnimation(string name)
+        private static string? SleepAnimation(string name)
         {
             string? anim = null;
             if (Game1.content.Load<Dictionary<string, string>>("Data\\animationDescriptions").ContainsKey(name.ToLower() + "_sleep"))
@@ -387,14 +428,12 @@ namespace Polyamory
             {
                 anim = Game1.content.Load<Dictionary<string, string>>("Data\\animationDescriptions")[name + "_Sleep"];
             }
-#pragma warning disable CS8603 // Possible null reference return.
             return anim;
-#pragma warning restore CS8603 // Possible null reference return.
         }
 
         public static bool HasSleepingAnimation(string name)
         {
-            string sleepAnim = SleepAnimation(name);
+            string? sleepAnim = SleepAnimation(name);
             if (sleepAnim == null || !sleepAnim.Contains('/'))
                 return false;
 
@@ -479,8 +518,9 @@ namespace Polyamory
             {
                 if (location.characters[i] != null && !location.characters[i].Name.Equals(characterToIgnore) && location.characters[i].GetBoundingBox().Intersects(tileLocationRect))
                 {
+#if !RELEASE
                     monitor.Log($"Tile {tileLocation} is occupied by {location.characters[i].Name}");
-
+#endif
                     return true;
                 }
             }
@@ -506,7 +546,6 @@ namespace Polyamory
             {
                 return topOfHeadOffsets[name];
             }
-            //SMonitor.Log($"dont yet have offset for {name}");
             int top = 0;
 
             if (name == "Krobus")
@@ -514,7 +553,7 @@ namespace Polyamory
 
             Texture2D tex = Game1.content.Load<Texture2D>($"Characters\\{Game1.getCharacterFromName(name).getTextureName()}");
 
-            string sleepAnim = SleepAnimation(name);
+            string? sleepAnim = SleepAnimation(name);
             if (sleepAnim == null || !int.TryParse(sleepAnim.Split('/')[0], out int sleepidx))
                 sleepidx = 8;
 
@@ -535,7 +574,9 @@ namespace Polyamory
                 int idx = startx + (i % 16) + (starty + i / 16) * 64;
                 if (idx >= colors.Length)
                 {
+#if !RELEASE
                     monitor.Log($"Sleep pos couldn't get pixel at {startx + i % 16},{starty + i / 16} ");
+#endif
                     break;
                 }
                 Color c = colors[idx];
