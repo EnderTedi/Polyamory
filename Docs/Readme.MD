@@ -68,7 +68,7 @@ Polyamory adds 4 additional Dialogue Keys located in the `Characters/Dialogue/<N
 	<td> Triggers when the player tries to give a mermaid's pendant to an NPC when already dating or rooming with a Monogamous NPC. Required if you have custom reject dialogue for the mermaid's pendant which bypasses the vanilla functions to marry the npc and the NPC is polyamorous. </td>
 </tr>
 <tr>
-	<td> RejectRoommateProposal_IsMonogamous_PlayerWithOtherPeople </td>
+	<td> RejectMermaidPendant_IsMonogamous_PlayerWithOtherPeople </td>
 	<td> Triggers when the player tries to give a mermaid's pendant to a Monogamous NPC when already dating or rooming with other NPCs. Required if you have custom reject dialogue for the mermaid's pendant which bypasses the vanilla functions to marry the npc and the NPC is monogamous. </td>
 </tr>
 <tr>
