@@ -6,5 +6,7 @@
 
         public string[]? PositiveChemistry { get; set; }
         public string[]? NegativeChemistry { get; set; }
+
+        public bool CanGoOutInTheSun { get; set; } = false;
     }
 }

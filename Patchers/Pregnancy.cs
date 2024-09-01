@@ -40,7 +40,7 @@ namespace Polyamory.Patchers
             }
         }
 
-        [HarmonyPatch(typeof(Utility), nameof(Utility.pickPersonalFarmEvent))]
+        [HarmonyPatch(typeof(StardewValley.Utility), nameof(StardewValley.Utility.pickPersonalFarmEvent))]
         public static class UtilityPatch_pickPersonalFarmEvent
         {
             public static bool Prefix(ref FarmEvent? __result)
@@ -106,10 +106,10 @@ namespace Polyamory.Patchers
                     List<Child> kids = f.getChildren();
                     //int maxChildren = childrenAPI == null ? config.MaxChildren : childrenAPI.GetMaxChildren();
                     int maxChildren = config.MaxChildren;
-                    FarmHouse fh = Utility.getHomeOfFarmer(f);
+                    FarmHouse fh = StardewValley.Utility.getHomeOfFarmer(f);
                     bool can = spouse.daysAfterLastBirth <= 0 && fh.cribStyle.Value > 0 && fh.upgradeLevel >= 2 && friendship.DaysUntilBirthing < 0 && heartsWithSpouse >= 10 && friendship.DaysMarried >= 7 && kids.Count < maxChildren;
 #if !RELEASE
-                    monitor.Log($"Checking ability to get pregnant: {spouse.Name} {can}:{(fh.cribStyle.Value > 0 ? $" no crib" : "")}{(Utility.getHomeOfFarmer(f).upgradeLevel < 2 ? $" house level too low {Utility.getHomeOfFarmer(f).upgradeLevel}" : "")}{(friendship.DaysMarried < 7 ? $", not married long enough {friendship.DaysMarried}" : "")}{(friendship.DaysUntilBirthing >= 0 ? $", already pregnant (gives birth in: {friendship.DaysUntilBirthing})" : "")}");
+                    monitor.Log($"Checking ability to get pregnant: {spouse.Name} {can}:{(fh.cribStyle.Value > 0 ? $" no crib" : "")}{(StardewValley.Utility.getHomeOfFarmer(f).upgradeLevel < 2 ? $" house level too low {StardewValley.Utility.getHomeOfFarmer(f).upgradeLevel}" : "")}{(friendship.DaysMarried < 7 ? $", not married long enough {friendship.DaysMarried}" : "")}{(friendship.DaysUntilBirthing >= 0 ? $", already pregnant (gives birth in: {friendship.DaysUntilBirthing})" : "")}");
 #endif
                     if (can && Game1.player.currentLocation == Game1.getLocationFromName(Game1.player.homeLocation.Value) && Polyamory.random.NextDouble() < 0.05)
                     {
@@ -184,7 +184,7 @@ namespace Polyamory.Patchers
                     chance += Game1.player.hasDarkSkin() ? 0.5 : 0.0;
                     bool isDarkSkinned = new Random((int)Game1.uniqueIDForThisGame + (int)Game1.stats.DaysPlayed).NextDouble() < chance;
                     string newBabyName = ___babyName;
-                    List<NPC> all_characters = Utility.getAllCharacters();
+                    List<NPC> all_characters = StardewValley.Utility.getAllCharacters();
                     bool collision_found = false;
                     do
                     {
@@ -212,7 +212,7 @@ namespace Polyamory.Patchers
                     };
                     baby.modData["EnderTedi.Polyamory/OtherParent"] = lastBirthingSpouse.Name;
 
-                    Utility.getHomeOfFarmer(Game1.player).characters.Add(baby);
+                    StardewValley.Utility.getHomeOfFarmer(Game1.player).characters.Add(baby);
                     Game1.playSound("smallSelect");
                     Game1.getCharacterFromName(lastBirthingSpouse.Name).daysAfterLastBirth = 5;
                     Game1.player.friendshipData[lastBirthingSpouse.Name].NextBirthingDate = null;
@@ -251,7 +251,7 @@ namespace Polyamory.Patchers
                     {
                         Game1.keyboardDispatcher.Subscriber = null;
                     }
-                    Game1.player.Position = Utility.PointToVector2(Utility.getHomeOfFarmer(Game1.player).getBedSpot()) * 64f;
+                    Game1.player.Position = StardewValley.Utility.PointToVector2(StardewValley.Utility.getHomeOfFarmer(Game1.player).getBedSpot()) * 64f;
                     Game1.globalFadeToClear(null, 0.02f);
                     lastBirthingSpouse = null;
                     __result = true;
