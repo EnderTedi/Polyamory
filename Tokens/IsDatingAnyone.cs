@@ -1,4 +1,5 @@
-﻿using StardewValley;
+﻿using StardewModdingAPI;
+using StardewValley;
 
 namespace Polyamory.Tokens
 {
@@ -33,17 +34,27 @@ namespace Polyamory.Tokens
             List<string> args = input?.ToLower()?.Trim()?.Split('|').ToList() ?? new List<string>();
             error = "";
 
+            foreach (string arg in args)
+            {
+                Polyamory.monitor.Log(arg, LogLevel.Alert);
+            }
+
+            if (args.Count == 1)
+            {
+                return true;
+            }
+
             if (args.Count > 2)
             {
                 error = "Too many inputs.";
                 return false;
             }
-            else if (!args[1].StartsWith("player"))
+            else if (args.Count == 2 && !args[1].Contains("player"))
             {
                 error = "Input is invalid. Expected one of 'Player'";
                 return false;
             }
-            else if (!args[1].Split('=')[1].Equals("main") && !args[0].Split('=')[1].Equals("local") && !args[0].Split('=')[1].Equals("any"))
+            else if (args.Count == 2 && args[1].Split('=').Length == 2 && !args[1].Split('=')[1].Equals("main") && !args[0].Split('=')[1].Equals("local") && !args[0].Split('=')[1].Equals("any"))
             {
                 error = "Player input is invalid. Expected one of 'Main', 'Local' or 'Any'.";
                 return false;
@@ -56,20 +67,19 @@ namespace Polyamory.Tokens
         {
             List<string> args = input?.ToLower()?.Trim()?.Split('|').ToList() ?? new List<string>();
 
-            if (args[1].Split('=')[1].Equals("main"))
-                return Polyamory.IsDatingOtherPeople(Game1.MasterPlayer) ? new List<string>() { "true" } : new List<string>() { "false" };
-            else if (args[1].Split('=')[1].Equals("local") || args.Count == 1)
-                return Polyamory.IsDatingOtherPeople(Game1.player) ? new List<string>() { "true" } : new List<string>() { "false" };
-
             bool isDating = false;
-            foreach (Farmer player in Game1.getAllFarmers())
-            {
-                if (Polyamory.IsDatingOtherPeople(player))
+            if (args.Count == 2 && args[1].Split('=')[1].Equals("main"))
+                isDating = Polyamory.IsDatingOtherPeople(Game1.MasterPlayer);
+            else if (args.Count == 2 && args[1].Split('=')[1].Equals("local") || args.Count == 1)
+                isDating = Polyamory.IsDatingOtherPeople(Game1.player);
+            else foreach (Farmer player in Game1.getAllFarmers())
                 {
-                    isDating = true;
-                    break;
+                    if (Polyamory.IsDatingOtherPeople(player))
+                    {
+                        isDating = true;
+                        break;
+                    }
                 }
-            }
 
             return isDating ? new List<string>() { "true" } : new List<string>() { "false" };
         }

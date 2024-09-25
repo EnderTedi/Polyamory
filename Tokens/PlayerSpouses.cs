@@ -1,4 +1,5 @@
 ﻿using StardewValley;
+using StardewModdingAPI;
 
 namespace Polyamory.Tokens
 {
@@ -30,19 +31,29 @@ namespace Polyamory.Tokens
             List<string> args = input?.ToLower()?.Trim()?.Split('|').ToList() ?? new List<string>();
             error = "";
 
+            foreach (string arg in args)
+            {
+                Polyamory.monitor.Log(arg, LogLevel.Alert);
+            }
+
+            if (args.Count == 1)
+            {
+                return true;
+            }
+
             if (args.Count > 2)
             {
                 error = "Too many inputs.";
                 return false;
             }
-            else if (!args[1].StartsWith("player"))
+            else if (args.Count == 2 && !args[1].Contains("player"))
             {
                 error = "Input is invalid. Expected one of 'Player'";
                 return false;
             }
-            else if (!args[1].Split('=')[1].Equals("main") && !args[0].Split('=')[1].Equals("local"))
+            else if (args.Count == 2 && args[1].Split('=').Length == 2 && !args[1].Split('=')[1].Equals("main") && !args[0].Split('=')[1].Equals("local") && !args[0].Split('=')[1].Equals("any"))
             {
-                error = "Player input is invalid. Expected one of 'Main' or 'Local'.";
+                error = "Player input is invalid. Expected one of 'Main', 'Local' or 'Any'.";
                 return false;
             }
 

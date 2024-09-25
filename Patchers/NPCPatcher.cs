@@ -7,6 +7,7 @@ using StardewValley.Characters;
 using StardewValley.Extensions;
 using StardewValley.GameData.Characters;
 using StardewValley.Locations;
+using StardewValley.Quests;
 using System.Collections;
 using System.Linq;
 using System.Reflection;
@@ -498,7 +499,7 @@ namespace Polyamory.Patchers
         {
             public static bool Prefix(NPC __instance, ref bool __result, Farmer who, GameLocation l)
             {
-                if (__instance.IsInvisible || __instance.isSleeping.Value || !who.canMove || who.checkForQuestComplete(__instance, -1, -1, who.ActiveObject, null, -1, 5) || (who.pantsItem.Value?.ParentSheetIndex == 15 && (__instance.Name.Equals("Lewis") || __instance.Name.Equals("Marnie"))) || (__instance.Name.Equals("Krobus") && who.hasQuest("28")))
+                if (__instance.IsInvisible || __instance.isSleeping.Value || !who.canMove || who.NotifyQuests((Quest quest) => quest.OnNpcSocialized(__instance)) || (who.pantsItem.Value?.ParentSheetIndex == 15 && (__instance.Name.Equals("Lewis") || __instance.Name.Equals("Marnie"))) || (__instance.Name.Equals("Krobus") && who.hasQuest("28")))
                     return true;
 
                 try

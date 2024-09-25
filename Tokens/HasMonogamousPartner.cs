@@ -1,4 +1,6 @@
-﻿using StardewValley;
+﻿using Microsoft.CodeAnalysis.Operations;
+using StardewModdingAPI;
+using StardewValley;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,17 +40,27 @@ namespace Polyamory.Tokens
             List<string> args = input?.ToLower()?.Trim()?.Split('|').ToList() ?? new List<string>();
             error = "";
 
+            foreach (string arg in args)
+            {
+                Polyamory.monitor.Log(arg, LogLevel.Alert);
+            }
+
+            if (args.Count == 1)
+            {
+                return true;
+            }
+
             if (args.Count > 2)
             {
                 error = "Too many inputs.";
                 return false;
             }
-            else if (!args[1].StartsWith("player"))
+            else if (args.Count == 2 && !args[1].Contains("player"))
             {
                 error = "Input is invalid. Expected one of 'Player'";
                 return false;
             }
-            else if (!args[1].Split('=')[1].Equals("main") && !args[0].Split('=')[1].Equals("local") && !args[0].Split('=')[1].Equals("any"))
+            else if (args.Count == 2 && args[1].Split('=').Length == 2 && !args[1].Split('=')[1].Equals("main") && !args[0].Split('=')[1].Equals("local") && !args[0].Split('=')[1].Equals("any"))
             {
                 error = "Player input is invalid. Expected one of 'Main', 'Local' or 'Any'.";
                 return false;
@@ -62,22 +74,19 @@ namespace Polyamory.Tokens
             List<string> args = input?.ToLower()?.Trim()?.Split('|').ToList() ?? new List<string>();
             bool isMonogamous = false;
 
-            if (args[1].Split('=')[1].Equals("main"))
+            if (args.Count == 2 && args[1].Split('=')[1].Equals("main"))
             {
                 isMonogamous = Polyamory.IsWithMonogamousNPC(Game1.MasterPlayer);
             }
-            else if (args[1].Split('=')[1].Equals("local") || args.Count == 1)
+            else if (args.Count == 2 && args[1].Split('=')[1].Equals("local") || args.Count == 1)
             {
                 isMonogamous = Polyamory.IsWithMonogamousNPC(Game1.player);
             }
-            else
-            {
-                foreach (Farmer player in Game1.getAllFarmers())
+            else foreach (Farmer player in Game1.getAllFarmers())
                 {
                     isMonogamous = Polyamory.IsWithMonogamousNPC(player);
                     if (isMonogamous) break;
                 }
-            }
 
             return isMonogamous ? new List<string>() { "true" } : new List<string>() { "false" };
         }
