@@ -12,7 +12,7 @@
   "Author": "EnderTedi",
   "Version": "1.0.0-beta.4.Debug",
   "Description": "Polyamory with exclusions",
-  "MinimumApiVersion": "4.0.0",
+  "MinimumApiVersion": "4.1.0",
   "MinimumGameVersion": "1.6.0",
   "EntryDll": "Polyamory.dll",
   "Dependencies": [
@@ -22,7 +22,7 @@
     },
     {
       "UniqueID": "spacechase0.SpaceCore",
-      "MinimumVersion": "1.24.0",
+      "MinimumVersion": "1.26.0",
       "IsRequired": false
     }
   ],

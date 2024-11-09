@@ -94,7 +94,7 @@ namespace Polyamory.Patchers
                         return false;
                     }
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-                    typeof(NPC).GetMethod("engagementResponse", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { who, true });
+                    typeof(NPC).GetMethod("engagementResponse", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, [ who, true ]);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
                     __result = true;
                     return false;
@@ -190,7 +190,7 @@ namespace Polyamory.Patchers
                                         monitor.Log($"{__instance.Name} is getting married");
 #endif
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-                                        typeof(NPC).GetMethod("engagementResponse", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { who, false });
+                                        typeof(NPC).GetMethod("engagementResponse", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, [ who, false ]);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
                                         __result = true;
                                         return false;
@@ -598,10 +598,8 @@ namespace Polyamory.Patchers
                     if (___isPlayingSleepingAnimation)
                         return true;
                     Dictionary<string, string> animationDescriptions = Game1.content.Load<Dictionary<string, string>>("Data\\animationDescriptions");
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-                    if (animationDescriptions.TryGetValue(__instance.Name.ToLower() + "_sleep", out string sleepString) && !int.TryParse(sleepString.Split('/')[0], out int sleep_frame))
+                    if (animationDescriptions.TryGetValue(__instance.Name.ToLower() + "_sleep", out string? sleepString) && !int.TryParse(sleepString.Split('/')[0], out int sleep_frame))
                         return false;
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 }
                 catch (Exception ex)
                 {
@@ -619,10 +617,9 @@ namespace Polyamory.Patchers
                     {
                         if (int.TryParse(animationDescriptions[__instance.Name + "_Sleep"].Split('/')[0], out int sleep_frame))
                         {
-                            __instance.Sprite.setCurrentAnimation(new List<FarmerSprite.AnimationFrame>
-                        {
+                            __instance.Sprite.setCurrentAnimation([
                             new(sleep_frame, 100, false, false, null, false)
-                        });
+                        ]);
                             __instance.Sprite.loop = true;
                         }
                     }

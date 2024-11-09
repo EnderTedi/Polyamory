@@ -8,7 +8,7 @@ namespace Polyamory
 {
     internal partial class Polyamory
     {
-        private readonly static Dictionary<string, int> topOfHeadOffsets = new();
+        private readonly static Dictionary<string, int> topOfHeadOffsets = [];
 
         public static bool IsNpcPolyamorous(string npc)
         {
@@ -35,7 +35,7 @@ namespace Polyamory
 
         public static List<string> PeopleDating(Farmer farmer)
         {
-            List<string>? partners = new();
+            List<string>? partners = [];
             foreach (string npc in Game1.characterData.Keys)
             {
                 farmer.friendshipData.TryGetValue(npc, out var friendship);
@@ -131,8 +131,8 @@ namespace Polyamory
 
         public static void ReloadSpouses(Farmer farmer)
         {
-            Spouses[farmer.UniqueMultiplayerID] = new Dictionary<string, NPC>();
-            UnofficialSpouses[farmer.UniqueMultiplayerID] = new Dictionary<string, NPC>();
+            Spouses[farmer.UniqueMultiplayerID] = [];
+            UnofficialSpouses[farmer.UniqueMultiplayerID] = [];
             string ospouse = farmer.spouse;
             if (ospouse != null)
             {
@@ -233,7 +233,7 @@ namespace Polyamory
         {
             if (!Config.PreventHostileDivorces)
                 return;
-            List<string> friends = Game1.player.friendshipData.Keys.ToList();
+            List<string> friends = [.. Game1.player.friendshipData.Keys];
             foreach (string f in friends)
             {
                 if (Game1.player.friendshipData[f].Status == FriendshipStatus.Divorced)
@@ -265,7 +265,7 @@ namespace Polyamory
             if (farmer == null)
                 return;
 
-            List<NPC> allSpouses = GetSpouses(farmer, true).Values.ToList();
+            List<NPC> allSpouses = [.. GetSpouses(farmer, true).Values];
 
             if (allSpouses.Count == 0)
             {
@@ -277,7 +277,7 @@ namespace Polyamory
 
             ShuffleList(ref allSpouses);
 
-            List<string> BedSpouses = new();
+            List<string> BedSpouses = [];
             string? KitchenSpouse = null;
             string? PorchSpouse = null;
             string? PatioSpouse = null;
@@ -435,7 +435,7 @@ namespace Polyamory
         public static List<string> ReorderSpousesForSleeping(List<string> sleepSpouses)
         {
             List<string> configSpouses = Config.SpouseSleepOrder.Split(',').Where(s => s.Length > 0).ToList();
-            List<string> spouses = new();
+            List<string> spouses = [];
             foreach (string s in configSpouses)
             {
                 if (sleepSpouses.Contains(s))
@@ -597,7 +597,7 @@ namespace Polyamory
         {
             int Type = (int)DType;
             var partners = PeopleDating(who);
-            string[] DialogueType = { "RejectBouquet", "RejectMermaidPendant", "RejectRoommateProposal" };
+            string[] DialogueType = [ "RejectBouquet", "RejectMermaidPendant", "RejectRoommateProposal" ];
             if (!IsNpcPolyamorous(npc.Name))
             {
                 Dialogue dialogue = npc.TryGetDialogue(DialogueType[Type] + "_IsMonogamous_PlayerWithOtherPeople", Game1.getCharacterFromName(partners[random.Next(0, partners.Count - 1)]).displayName);

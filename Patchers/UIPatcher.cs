@@ -143,16 +143,15 @@ namespace Polyamory.Patchers
 
                     if (dialogues[1] == Game1.content.LoadString("Strings\\StringsFromCSFiles:Event.cs.1826"))
                     {
-                        List<string> newDialogues = new()
-                    {
+                        List<string> newDialogues = [
                         dialogues[0]
-                    };
+                    ];
 
 
 
                         List<NPC> spouses = Polyamory.GetSpouses(Game1.player, true).Values.OrderBy(o => Game1.player.friendshipData[o.Name].Points).Reverse().Take(4).ToList();
 
-                        List<int> which = new() { 0, 1, 2, 3 };
+                        List<int> which = [ 0, 1, 2, 3 ];
 
                         Polyamory.ShuffleList(ref which);
 

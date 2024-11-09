@@ -40,10 +40,9 @@ namespace Polyamory.Patchers
                 {
                     s2 = Game1.content.LoadStringReturnNullIfNotFound("Strings\\Locations:ManorHouse_DivorceBook_Question");
                 }
-                List<Response> responses = new()
-                    {
+                List<Response> responses = [
                         new Response($"divorce_Yes_{whichAnswer}", Game1.content.LoadString("Strings\\Lexicon:QuestionDialogue_Yes"))
-                    };
+                    ];
 
                 if (config.ComplexDivorce)
                 {
@@ -52,7 +51,7 @@ namespace Polyamory.Patchers
 
                 responses.Add(new Response("No", Game1.content.LoadString("Strings\\Lexicon:QuestionDialogue_No")));
                 (Game1.activeClickableMenu as DialogueBox)?.closeDialogue();
-                Game1.currentLocation.createQuestionDialogue(s2, responses.ToArray(), "PolyamoryDivorce");
+                Game1.currentLocation.createQuestionDialogue(s2, [.. responses], "PolyamoryDivorce");
             }
             else if (whichAnswer.StartsWith("divorce_Yes_"))
             {
@@ -84,10 +83,9 @@ namespace Polyamory.Patchers
                     Game1.drawObjectDialogue(s);
                     if (!Game1.player.isRoommate(spouse))
                     {
-                        Game1.Multiplayer.globalChatInfoMessage("Divorce", new string[]
-                        {
+                        Game1.Multiplayer.globalChatInfoMessage("Divorce", [
                             Game1.player.Name
-                        });
+                        ]);
                     }
                 }
                 else
@@ -180,10 +178,9 @@ namespace Polyamory.Patchers
                     Game1.drawObjectDialogue(s);
                     if (!Game1.player.isRoommate(complexDivorceSpouse))
                     {
-                        Game1.Multiplayer.globalChatInfoMessage("Divorce", new string[]
-                        {
+                        Game1.Multiplayer.globalChatInfoMessage("Divorce", [
                                     Game1.player.Name
-                        });
+                        ]);
                     }
 #if !RELEASE
                     monitor.Log($"hearts lost {Polyamory.divorceHeartsLost}");
@@ -210,7 +207,7 @@ namespace Polyamory.Patchers
 #if !RELEASE
             monitor.Log("has dialogue: " + s2.ToString());
 #endif
-            List<Response> responses = new();
+            List<Response> responses = [];
             int i = 1;
             while (true)
             {
@@ -230,7 +227,7 @@ namespace Polyamory.Patchers
             Game1.currentLocation.lastQuestionKey = "";
             Game1.isQuestion = true;
             Game1.dialogueUp = true;
-            l.createQuestionDialogue(s2, responses.ToArray(), "PolyamoryDivorce");
+            l.createQuestionDialogue(s2, [.. responses], "PolyamoryDivorce");
         }
     }
 }
