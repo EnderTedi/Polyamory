@@ -5,8 +5,11 @@ using StardewValley;
 using StardewValley.Audio;
 using StardewValley.Characters;
 using StardewValley.Extensions;
+using StardewValley.GameData.Characters;
 using StardewValley.Locations;
+using StardewValley.Quests;
 using System.Collections;
+using System.Linq;
 using System.Reflection;
 using Color = Microsoft.Xna.Framework.Color;
 using Object = StardewValley.Object;
@@ -34,14 +37,20 @@ namespace Polyamory.Patchers
         {
             public static bool Prefix(NPC __instance, ref bool __result, ref string __state, Farmer who, bool probe = false)
             {
-
-                if (Game1.player.spouse != null && Game1.player.spouse != __instance.Name && Polyamory.GetSpouses(who, true).Count != 0 && Polyamory.GetSpouses(who, true).ContainsKey(__instance.Name))
+                if (__instance.SimpleNonVillagerNPC)
                 {
-                    __state = who.spouse;
-                    who.spouse = __instance.Name;
+                    return true;
                 }
 
                 Object activeObj = who.ActiveObject;
+
+                if (who.spouse != null && who.spouse != __instance.Name && Polyamory.GetSpouses(who, true).ContainsKey(__instance.Name))
+                {
+                    if (activeObj is null || activeObj.QualifiedItemId != "(O)458")
+                        __state = who.spouse;
+                    who.spouse = __instance.Name;
+                }
+
                 bool canReceiveGifts = __instance.CanReceiveGifts();
 
                 if (who.getFriendshipHeartLevelForNPC(__instance.Name) >= 10 && !probe && canReceiveGifts && activeObj is not null && activeObj.QualifiedItemId == "(O)458")
@@ -49,17 +58,17 @@ namespace Polyamory.Patchers
                     if (!Polyamory.IsValidDating(who, __instance.Name))
                     {
                         monitor.Log("Can't date, will attempt to use custom reject dialogue");
-                        __instance.setNewDialogue(Polyamory.FetchAppropriateDialogue(__instance, who, 1));
+                        __instance.setNewDialogue(Polyamory.FetchAppropriateDialogue(__instance, who, Polyamory.DialogueType.Bouquet));
                         Game1.drawDialogue(__instance);
                         __result = false;
                         return false;
                     }
                     else
                     {
-                        Dialogue Reject = __instance.TryGetDialogue("RejectItem_" + activeObj.QualifiedItemId);
-                        Reject ??= __instance.TryGetDialogue("RejectBouquet")
+                        Dialogue Reject = __instance.TryGetDialogue("RejectItem_" + activeObj.QualifiedItemId)
+                            ?? __instance.TryGetDialogue("RejectBouquet")
                             ?? (Game1.random.NextBool() ? new Dialogue(__instance, "Strings\\StringsFromCSFiles:NPC.cs.3956") : new Dialogue(__instance, "Strings\\StringsFromCSFiles:NPC.cs.3957", isGendered: true));
-                            
+
                         __instance.CurrentDialogue.Push(Reject);
                         Game1.drawDialogue(__instance);
                         __result = false;
@@ -67,12 +76,12 @@ namespace Polyamory.Patchers
                     }
                 }
 
-                if (who.getFriendshipHeartLevelForNPC(__instance.Name) >= 10 && !probe && canReceiveGifts && activeObj is not null && activeObj.HasContextTag(ItemContextTagManager.SanitizeContextTag("propose_roommate_" + __instance.Name)))
+                if (who.getFriendshipHeartLevelForNPC(__instance.Name) >= 10 && !probe && canReceiveGifts && activeObj is not null && activeObj.HasContextTag(ItemContextTagManager.SanitizeContextTag("propose_roommate_" + __instance.Name.ToLower().Replace(' ', '_'))))
                 {
                     if (!Polyamory.IsValidDating(who, __instance.Name) && ( who.friendshipData[__instance.Name] is null || who.friendshipData[__instance.Name].Status is FriendshipStatus.Friendly or FriendshipStatus.Divorced))
                     {
                         monitor.Log("Can't roommate, will attempt to use custom reject dialogue");
-                        __instance.setNewDialogue(Polyamory.FetchAppropriateDialogue(__instance, who, 3));
+                        __instance.setNewDialogue(Polyamory.FetchAppropriateDialogue(__instance, who, Polyamory.DialogueType.Roommate));
                         Game1.drawDialogue(__instance);
                         __result = false;
                         return false;
@@ -85,7 +94,7 @@ namespace Polyamory.Patchers
                         return false;
                     }
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-                    typeof(NPC).GetMethod("engagementResponse", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { who, true });
+                    typeof(NPC).GetMethod("engagementResponse", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, [ who, true ]);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
                     __result = true;
                     return false;
@@ -101,7 +110,7 @@ namespace Polyamory.Patchers
                             {
                                 if (!Polyamory.IsValidDating(who, __instance.Name))
                                 {
-                                    __instance.setNewDialogue(Polyamory.FetchAppropriateDialogue(__instance, who, 2));
+                                    __instance.setNewDialogue(Polyamory.FetchAppropriateDialogue(__instance, who, Polyamory.DialogueType.Pendant));
                                     Game1.drawDialogue(__instance);
                                     __result = false;
                                     return false;
@@ -181,7 +190,7 @@ namespace Polyamory.Patchers
                                         monitor.Log($"{__instance.Name} is getting married");
 #endif
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-                                        typeof(NPC).GetMethod("engagementResponse", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, new object[] { who, false });
+                                        typeof(NPC).GetMethod("engagementResponse", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(__instance, [ who, false ]);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
                                         __result = true;
                                         return false;
@@ -437,23 +446,25 @@ namespace Polyamory.Patchers
 
                 try
                 {
-                    IDictionary npcExtData = Game1.content.Load<IDictionary>("spacechase0.SpaceCore/NpcExtensionData");
-                    if (npcExtData is not null && npcExtData.Contains($"{__instance.Name}") && Polyamory.GetSpouses(Game1.player, true).ContainsKey(__instance.Name))
+                    if (helper.ModRegistry.IsLoaded("spacechase0.SpaceCore"))
                     {
-                        var entry = npcExtData[__instance.Name] as dynamic;
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                        if (entry.IgnoreMarriageSchedule)
+                        IDictionary npcExtData = Game1.content.Load<IDictionary>("spacechase0.SpaceCore/NpcExtensionData");
+                        if (npcExtData is not null && npcExtData.Contains($"{__instance.Name}") && Polyamory.GetSpouses(Game1.player, true).ContainsKey(__instance.Name))
                         {
-                            __state = null;
-                            if (Game1.player.spouse == __instance.Name)
+                            var entry = npcExtData[__instance.Name] as dynamic;
+                            if (entry?.IgnoreMarriageSchedule ?? false)
                             {
-                                __state = Game1.player.spouse;
-                                Game1.player.spouse = "";
-                                return;
+                                __state = null;
+                                if (Game1.player.spouse == __instance.Name)
+                                {
+                                    __state = Game1.player.spouse;
+                                    Game1.player.spouse = "";
+                                    return;
+                                }
                             }
                         }
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
                     }
+                    
                     if (Polyamory.GetSpouses(Game1.player, false).ContainsKey(__instance.Name))
                     {
                         __state = Game1.player.spouse;
@@ -486,119 +497,77 @@ namespace Polyamory.Patchers
         [HarmonyPatch(typeof(NPC), nameof(NPC.checkAction))]
         public static class NPCPatch_checkAction
         {
-            public static bool Prefix(NPC __instance, ref bool __result, Farmer who)
+            public static bool Prefix(NPC __instance, ref bool __result, Farmer who, GameLocation l)
             {
-                if (__instance.IsInvisible || __instance.isSleeping.Value || !who.canMove || who.checkForQuestComplete(__instance, -1, -1, who.ActiveObject, null, -1, 5) || (who.pantsItem.Value?.ParentSheetIndex == 15 && (__instance.Name.Equals("Lewis") || __instance.Name.Equals("Marnie"))) || (__instance.Name.Equals("Krobus") && who.hasQuest("28")))
+                if (__instance.IsInvisible || __instance.isSleeping.Value || !who.canMove || who.NotifyQuests((Quest quest) => quest.OnNpcSocialized(__instance)) || (who.pantsItem.Value?.ParentSheetIndex == 15 && (__instance.Name.Equals("Lewis") || __instance.Name.Equals("Marnie"))) || (__instance.Name.Equals("Krobus") && who.hasQuest("28")))
                     return true;
 
                 try
                 {
                     Polyamory.ResetSpouses(who);
 
-                    if ((__instance.Name.Equals(who.spouse) || Polyamory.GetSpouses(who, true).ContainsKey(__instance.Name)) && __instance.Sprite.CurrentAnimation == null && who.IsLocalPlayer)
+                    if (Polyamory.GetSpouses(who, true).ContainsKey(__instance.Name) && __instance.Sprite.CurrentAnimation == null && who.IsLocalPlayer)
                     {
 #if !RELEASE
                         monitor.Log($"{__instance.Name} is married to {who.Name}");
 #endif
-
                         __instance.faceDirection(-3);
-
-                        if (who.friendshipData.ContainsKey(__instance.Name) && who.friendshipData[__instance.Name].Points >= 3125 && who.mailReceived.Add("CF_Spouse"))
+                        if (who.friendshipData[__instance.Name] != null && who.friendshipData[__instance.Name].Points >= 3125 && who.mailReceived.Add("CF_Spouse"))
                         {
-#if !RELEASE
-                            monitor.Log($"getting starfruit");
-#endif
-                            __instance.CurrentDialogue.Push(new Dialogue(__instance, Game1.player.isRoommate(who.spouse) ? "Strings\\StringsFromCSFiles:Krobus_Stardrop" : "Strings\\StringsFromCSFiles:NPC.cs.4001", false));
-                            Object stardrop = ItemRegistry.Create<Object>("(O)434", 1, 0, false);
+                            __instance.CurrentDialogue.Push(__instance.TryGetDialogue("SpouseStardrop") ?? new Dialogue(__instance, "Strings\\StringsFromCSFiles:NPC.cs.4001"));
+                            Object stardrop = ItemRegistry.Create<Object>("(O)434");
                             stardrop.CanBeSetDown = false;
                             stardrop.CanBeGrabbed = false;
-                            Game1.player.addItemByMenuIfNecessary(stardrop, null);
+                            Game1.player.addItemByMenuIfNecessary(stardrop);
                             __instance.shouldSayMarriageDialogue.Value = false;
                             __instance.currentMarriageDialogue.Clear();
                             __result = true;
                             return false;
                         }
-                        if (__instance.Sprite.CurrentAnimation == null && !__instance.hasTemporaryMessageAvailable() && __instance.currentMarriageDialogue.Count == 0 && __instance.CurrentDialogue.Count == 0 && Game1.timeOfDay < 2200 && !__instance.isMoving() && who.ActiveObject == null /*&& Polyamory.kissingAPI == null*/)
+                        if (!__instance.hasTemporaryMessageAvailable() && __instance.currentMarriageDialogue.Count == 0 && __instance.CurrentDialogue.Count == 0 && Game1.timeOfDay < 2200 && !__instance.isMoving() && who.ActiveObject == null)
                         {
-#if !RELEASE
-                            monitor.Log($"Trying to kiss/hug {__instance.Name}");
-#endif
-
-                            __instance.faceGeneralDirection(who.getStandingPosition(), 0, false);
-                            who.faceGeneralDirection(__instance.getStandingPosition(), 0, false);
+                            __instance.faceGeneralDirection(who.getStandingPosition(), 0, opposite: false, useTileCalculations: false);
+                            who.faceGeneralDirection(__instance.getStandingPosition(), 0, opposite: false, useTileCalculations: false);
                             if (__instance.FacingDirection == 3 || __instance.FacingDirection == 1)
                             {
-
-                                if (__instance.hasBeenKissedToday.Value)
+                                CharacterData data = __instance.GetData();
+                                int spouseFrame = data?.KissSpriteIndex ?? 28;
+                                bool facingRight = data?.KissSpriteFacingRight ?? true;
+                                bool flip = facingRight != (__instance.FacingDirection == 1);
+                                if (who.getFriendshipHeartLevelForNPC(__instance.Name) > 9 && __instance.sleptInBed.Value)
                                 {
-#if !RELEASE
-                                    monitor.Log($"{__instance.Name} has been kissed today");
-#endif
-                                    return true;
-                                }
-
-                                int spouseFrame = __instance.GetData().KissSpriteIndex;
-                                bool facingRight = __instance.GetData().KissSpriteFacingRight;
-                                string name = __instance.Name;
-                                bool flip = (facingRight && __instance.FacingDirection == 3) || (!facingRight && __instance.FacingDirection == 1);
-                                if (who.getFriendshipHeartLevelForNPC(__instance.Name) >= 9)
-                                {
-#if !RELEASE
-                                    monitor.Log($"Can kiss/hug {__instance.Name}");
-#endif
-
-                                    int delay = Game1.IsMultiplayer ? 1000 : 10;
-                                    __instance.movementPause = delay;
-                                    __instance.Sprite.setCurrentAnimation(new List<FarmerSprite.AnimationFrame>
-                                {
-                                    new (spouseFrame, delay, false, flip, new AnimatedSprite.endOfAnimationBehavior(__instance.haltMe), true)
-                                });
+                                    int delay = __instance.movementPause = Game1.IsMultiplayer ? 1000 : 10;
+                                    __instance.Sprite.ClearAnimation();
+                                    __instance.Sprite.AddFrame(new FarmerSprite.AnimationFrame(spouseFrame, delay, secondaryArm: false, flip, __instance.haltMe, behaviorAtEndOfFrame: true));
                                     if (!__instance.hasBeenKissedToday.Value)
                                     {
                                         who.changeFriendship(10, __instance);
-                                        if (who.friendshipData[__instance.Name].RoommateMarriage)
+                                        if (who.hasCurrentOrPendingRoommate())
                                         {
-#if !RELEASE
-                                            monitor.Log($"Hugging {__instance.Name}");
-#endif
-                                            Game1.Multiplayer.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite[]
-                                            {
-                                            new("LooseSprites\\emojis", new Rectangle(0, 0, 9, 9), 2000f, 1, 0, new Vector2(__instance.Tile.X, __instance.Tile.Y) * 64f + new Vector2(16f, -64f), false, false, 1f, 0f, Color.White, 4f, 0f, 0f, 0f, false)
+                                            Game1.Multiplayer.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite("LooseSprites\\emojis", new Rectangle(0, 0, 9, 9), 2000f, 1, 0, __instance.Tile * 64f + new Vector2(16f, -64f), flicker: false, flipped: false, 1f, 0f, Color.White, 4f, 0f, 0f, 0f)
                                             {
                                                 motion = new Vector2(0f, -0.5f),
                                                 alphaFade = 0.01f
-                                            }
                                             });
                                         }
                                         else
                                         {
-#if !RELEASE
-                                            monitor.Log($"Kissing {__instance.Name}");
-#endif
-                                            Game1.Multiplayer.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite[]
-                                            {
-                                            new("LooseSprites\\Cursors", new Rectangle(211, 428, 7, 6), 2000f, 1, 0, new Vector2(__instance.Tile.X, __instance.Tile.Y) * 64f + new Vector2(16f, -64f), false, false, 1f, 0f, Color.White, 4f, 0f, 0f, 0f, false)
+                                            Game1.Multiplayer.broadcastSprites(who.currentLocation, new TemporaryAnimatedSprite("LooseSprites\\Cursors", new Microsoft.Xna.Framework.Rectangle(211, 428, 7, 6), 2000f, 1, 0, __instance.Tile * 64f + new Vector2(16f, -64f), flicker: false, flipped: false, 1f, 0f, Color.White, 4f, 0f, 0f, 0f)
                                             {
                                                 motion = new Vector2(0f, -0.5f),
                                                 alphaFade = 0.01f
-                                            }
                                             });
                                         }
-                                        __instance.currentLocation.playSound("dwop", null, null, SoundContext.NPC);
+                                        l.playSound("dwop", null, null, SoundContext.NPC);
                                         who.exhausted.Value = false;
-
                                     }
                                     __instance.hasBeenKissedToday.Value = true;
                                     __instance.Sprite.UpdateSourceRect();
                                 }
                                 else
                                 {
-#if !RELEASE
-                                    monitor.Log($"Kiss/hug rejected by {__instance.Name}");
-#endif
-
-                                    __instance.faceDirection((Polyamory.random.NextDouble() < 0.5) ? 2 : 0);
-                                    __instance.doEmote(12, true);
+                                    __instance.faceDirection(Game1.random.Choose(2, 0));
+                                    __instance.doEmote(12);
                                 }
                                 int playerFaceDirection = 1;
                                 if ((facingRight && !flip) || (!facingRight && flip))
@@ -606,8 +575,7 @@ namespace Polyamory.Patchers
                                     playerFaceDirection = 3;
                                 }
                                 who.PerformKiss(playerFaceDirection);
-                                __result = true;
-                                return false;
+                                return true;
                             }
                         }
                     }
@@ -630,10 +598,8 @@ namespace Polyamory.Patchers
                     if (___isPlayingSleepingAnimation)
                         return true;
                     Dictionary<string, string> animationDescriptions = Game1.content.Load<Dictionary<string, string>>("Data\\animationDescriptions");
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-                    if (animationDescriptions.TryGetValue(__instance.Name.ToLower() + "_sleep", out string sleepString) && !int.TryParse(sleepString.Split('/')[0], out int sleep_frame))
+                    if (animationDescriptions.TryGetValue(__instance.Name.ToLower() + "_sleep", out string? sleepString) && !int.TryParse(sleepString.Split('/')[0], out int sleep_frame))
                         return false;
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 }
                 catch (Exception ex)
                 {
@@ -651,10 +617,9 @@ namespace Polyamory.Patchers
                     {
                         if (int.TryParse(animationDescriptions[__instance.Name + "_Sleep"].Split('/')[0], out int sleep_frame))
                         {
-                            __instance.Sprite.setCurrentAnimation(new List<FarmerSprite.AnimationFrame>
-                        {
+                            __instance.Sprite.setCurrentAnimation([
                             new(sleep_frame, 100, false, false, null, false)
-                        });
+                        ]);
                             __instance.Sprite.loop = true;
                         }
                     }

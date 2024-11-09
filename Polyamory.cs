@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Polyamory.Patchers;
+using Polyamory.Utility;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Locations;
@@ -40,7 +41,7 @@ namespace Polyamory
         public static string? farmHelperSpouse = null;
         public static int bedSleepOffset = 76;
 
-        private static readonly string modid = "EnderTedi.Polyamory";
+        public static readonly string modid = "EnderTedi.Polyamory";
 
         public override void Entry(IModHelper Helper)
         {

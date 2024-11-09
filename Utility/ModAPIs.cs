@@ -2,8 +2,9 @@
 using GenericModConfigMenu;
 using StardewModdingAPI;
 using StardewValley;
+using Polyamory.Tokens;
 
-namespace Polyamory
+namespace Polyamory.Utility
 {
     internal class ModAPIs
     {
@@ -162,73 +163,11 @@ namespace Polyamory
 
             if (contentPatcher is not null)
             {
-                contentPatcher.RegisterToken(mod.ModManifest, "PlayerSpouses", () =>
-                {
-                    Farmer player;
+                contentPatcher.RegisterToken(mod.ModManifest, "PlayerSpouses", new PlayerSpouses());
 
-                    if (Context.IsWorldReady)
-                        player = Game1.player;
-                    else if (SaveGame.loaded?.player != null)
-                        player = SaveGame.loaded.player;
-                    else
-                        return null;
+                contentPatcher.RegisterToken(mod.ModManifest, "IsDatingAnyone", new IsDatingAnyone());
 
-                    var spouses = Polyamory.GetSpouses(player, true).Keys.ToList();
-                    spouses.Sort(delegate (string a, string b) {
-                        player.friendshipData.TryGetValue(a, out Friendship af);
-                        player.friendshipData.TryGetValue(b, out Friendship bf);
-                        if (af == null && bf == null)
-                            return 0;
-                        if (af == null)
-                            return -1;
-                        if (bf == null)
-                            return 1;
-                        if (af.WeddingDate == bf.WeddingDate)
-                            return 0;
-                        return af.WeddingDate > bf.WeddingDate ? -1 : 1;
-                    });
-                    return spouses.ToArray();
-                });
-
-                contentPatcher.RegisterToken(mod.ModManifest, "IsDatingAnyone", getValue: () =>
-                {
-                    Farmer player;
-
-                    if (Context.IsWorldReady)
-                        player = Game1.player;
-                    else if (SaveGame.loaded?.player != null)
-                        player = SaveGame.loaded.player;
-                    else
-                        return null;
-
-                    return new string[] { Polyamory.IsDatingOtherPeople(player) ? "true" : "false" };
-                });
-
-                contentPatcher.RegisterToken(mod.ModManifest, "HasMonogamousPartner", getValue: () =>
-                {
-                    Farmer player;
-
-                    if (Context.IsWorldReady)
-                        player = Game1.player;
-                    else if (SaveGame.loaded?.player != null)
-                        player = SaveGame.loaded.player;
-                    else
-                        return null;
-
-                    List<string> partners = Polyamory.PeopleDating(player);
-
-                    if (partners is null) 
-                        return new string[] { "false" };
-
-                    foreach (string partner in partners)
-                    {
-                        if (!Polyamory.IsNpcPolyamorous(partner))
-                        {
-                            return new string[] { "true" };
-                        }
-                    }
-                    return new string[] { "false" };
-                });
+                contentPatcher.RegisterToken(mod.ModManifest, "HasMonogamousPartner", new HasMonogamousPartner());
             }
         }
     }

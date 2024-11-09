@@ -199,7 +199,7 @@ namespace Polyamory.Patchers
 
                     if (EventPatcher.startingLoadActors && Environment.StackTrace.Contains("command_loadActors") && !Environment.StackTrace.Contains("addActor") && !Environment.StackTrace.Contains("Dialogue") && !Environment.StackTrace.Contains("checkForSpecialCharacters") && Game1Patcher.lastGotCharacter != null && __instance != null)
                     {
-                        __result = Utility.getHomeOfFarmer(__instance)?.getChildren()?.FindAll(c => c.displayName.EndsWith($"({Game1Patcher.lastGotCharacter})")) ?? new List<Child>();
+                        __result = StardewValley.Utility.getHomeOfFarmer(__instance)?.getChildren()?.FindAll(c => c.displayName.EndsWith($"({Game1Patcher.lastGotCharacter})")) ?? new List<Child>();
                         return false;
                     }
                 }
@@ -274,9 +274,9 @@ namespace Polyamory.Patchers
                         monitor.Log($"New spouse: {__instance.spouse}, married {__instance.isMarriedOrRoommates()}");
 #endif
 
-                        Utility.getHomeOfFarmer(__instance).showSpouseRoom();
-                        Utility.getHomeOfFarmer(__instance).setWallpapers();
-                        Utility.getHomeOfFarmer(__instance).setFloors();
+                        StardewValley.Utility.getHomeOfFarmer(__instance).showSpouseRoom();
+                        StardewValley.Utility.getHomeOfFarmer(__instance).setWallpapers();
+                        StardewValley.Utility.getHomeOfFarmer(__instance).setFloors();
 
                         Game1.getFarm().addSpouseOutdoorArea(__instance.spouse ?? "");
                     }

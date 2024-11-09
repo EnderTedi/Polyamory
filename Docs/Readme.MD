@@ -92,15 +92,15 @@ Polyamory adds 3 additional Content Patcher Tokens:
 </tr>
 <tr>
 	<td> EnderTedi.Polyamory/PlayerSpouses </td>
-	<td> Returns a list of all the spouses for the player. </td>
+	<td> Returns a list of all the spouses for the player. (Optional) Can take a player argument (one of 'Main' or 'Local'), example: 'EnderTedi.Polyamory/PlayerSpouses | Player=Main' </td>
 </tr>
 <tr>
 	<td> EnderTedi.Polyamory/IsDatingAnyone </td>
-	<td> Returns true if the player is dating anyone, else false. </td>
+	<td> Returns true if the player is dating anyone, else false. (Optional) Can take a player argument (one of 'Main', 'Local' or 'Any'), example: 'EnderTedi.Polyamory/IsDatingAnyone | Player=Local' </td>
 </tr>
 <tr>
 	<td> EnderTedi.Polyamory/HasMonogamousPartner </td>
-	<td> Returns true if the player is currently dating or rooming with a monogamous npc, else false </td>
+	<td> Returns true if the player is currently dating or rooming with a monogamous npc, else false. (Optional) Can take a player argument (one of 'Main', 'Local' or 'Any'), example: 'EnderTedi.Polyamory/HasMonogamousPartner | Player=Local' </td>
 </tr>
 </table>
 

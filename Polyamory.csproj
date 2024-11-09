@@ -7,11 +7,12 @@
 	<UniqueId>EnderTedi.Polyamory</UniqueId>
 	<Authors>EnderTedi</Authors>
 	<Description>Polyamory with exclusions</Description>
-	<MinimumApiVersion>4.0.0</MinimumApiVersion>
+	<MinimumApiVersion>4.1.0</MinimumApiVersion>
 	<MinimumGameVersion>1.6.0</MinimumGameVersion>
 	  <EnableHarmony>true</EnableHarmony>
 	  <UpdateKeys>Nexus:26081</UpdateKeys>
-	  <Version>1.0.0-beta.3</Version>
+	  <Version>1.0.0-beta.4</Version>
+	  <LangVersion>12.0</LangVersion>
   </PropertyGroup>
 	
   <ItemGroup>

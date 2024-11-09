@@ -8,7 +8,7 @@ namespace Polyamory
 {
     internal partial class Polyamory
     {
-        private readonly static Dictionary<string, int> topOfHeadOffsets = new();
+        private readonly static Dictionary<string, int> topOfHeadOffsets = [];
 
         public static bool IsNpcPolyamorous(string npc)
         {
@@ -25,8 +25,7 @@ namespace Polyamory
             {
                 if (currNpc is not null && npc == currNpc) continue;
                 farmer.friendshipData.TryGetValue(npc, out var friendship);
-                if (friendship is null) continue;
-                if (friendship.Status is not FriendshipStatus.Friendly && friendship.Status is not FriendshipStatus.Divorced)
+                if (friendship is not null && friendship.IsDating())
                 {
                     IsDating = true;
                 }
@@ -36,12 +35,11 @@ namespace Polyamory
 
         public static List<string> PeopleDating(Farmer farmer)
         {
-            List<string>? partners = new();
+            List<string>? partners = [];
             foreach (string npc in Game1.characterData.Keys)
             {
                 farmer.friendshipData.TryGetValue(npc, out var friendship);
-                if (friendship is null) continue;
-                if (friendship.Status is FriendshipStatus.Dating or FriendshipStatus.Engaged or FriendshipStatus.Married)
+                if (friendship is not null && friendship.IsDating())
                 {
                     partners.Add(npc);
                 }
@@ -53,25 +51,32 @@ namespace Polyamory
         public static bool IsValidDating(Farmer farmer, string npc)
         {
             if (Game1.getCharacterFromName(npc) is null) return false;
+
             if (!HasChemistry(farmer, npc)) return false;
+
             var dating = PeopleDating(farmer);
             if (dating is null) return true;
+
             foreach (string partner in dating)
             {
                 if (partner == npc) continue;
+
                 if (partner != npc && !IsNpcPolyamorous(npc)) return false;
+
                 if (!HasChemistry(farmer, partner)) return false;
+
                 if (!IsNpcPolyamorous(partner)) return false;
             }
+
             return true;
         }
 
         public static bool IsWithMonogamousNPC(Farmer farmer)
         {
-            var spouses = PeopleDating(farmer);
-            foreach (string spouse in spouses)
+            var partners = PeopleDating(farmer);
+            foreach (string partner in partners)
             {
-                if (!IsNpcPolyamorous(spouse))
+                if (!IsNpcPolyamorous(partner))
                     return true;
             }
             return false;
@@ -126,8 +131,8 @@ namespace Polyamory
 
         public static void ReloadSpouses(Farmer farmer)
         {
-            Spouses[farmer.UniqueMultiplayerID] = new Dictionary<string, NPC>();
-            UnofficialSpouses[farmer.UniqueMultiplayerID] = new Dictionary<string, NPC>();
+            Spouses[farmer.UniqueMultiplayerID] = [];
+            UnofficialSpouses[farmer.UniqueMultiplayerID] = [];
             string ospouse = farmer.spouse;
             if (ospouse != null)
             {
@@ -203,7 +208,7 @@ namespace Polyamory
                 if (farmer.friendshipData[name].IsMarried() && farmer.spouse != name)
                 {
 #if !RELEASE
-                    monitor.Log($"{f.Name} is married to: {name}");
+                    monitor.Log($"{farmer.Name} is married to: {name}");
 #endif
                     if (farmer.spouse != null && farmer.friendshipData[farmer.spouse] != null && !farmer.friendshipData[farmer.spouse].IsMarried() && !farmer.friendshipData[farmer.spouse].IsEngaged())
                     {
@@ -228,7 +233,7 @@ namespace Polyamory
         {
             if (!Config.PreventHostileDivorces)
                 return;
-            List<string> friends = Game1.player.friendshipData.Keys.ToList();
+            List<string> friends = [.. Game1.player.friendshipData.Keys];
             foreach (string f in friends)
             {
                 if (Game1.player.friendshipData[f].Status == FriendshipStatus.Divorced)
@@ -260,7 +265,7 @@ namespace Polyamory
             if (farmer == null)
                 return;
 
-            List<NPC> allSpouses = GetSpouses(farmer, true).Values.ToList();
+            List<NPC> allSpouses = [.. GetSpouses(farmer, true).Values];
 
             if (allSpouses.Count == 0)
             {
@@ -272,65 +277,55 @@ namespace Polyamory
 
             ShuffleList(ref allSpouses);
 
-            List<string> BedSpouses = new();
+            List<string> BedSpouses = [];
             string? KitchenSpouse = null;
             string? PorchSpouse = null;
             string? PatioSpouse = null;
 
             foreach (NPC spouse in allSpouses)
             {
-                IDictionary npcExtData = Game1.content.Load<IDictionary>("spacechase0.SpaceCore/NpcExtensionData");
-                if (npcExtData is not null && npcExtData.Contains($"{spouse}"))
+
+                if (helper.ModRegistry.IsLoaded("spacechase0.SpaceCore"))
                 {
-                    var entry = npcExtData[spouse.Name] as dynamic;
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                    if (entry.IgnoreMarriageSchedule)
+                    IDictionary npcExtData = Game1.content.Load<IDictionary>("spacechase0.SpaceCore/NpcExtensionData");
+                    if (npcExtData is not null && npcExtData.Contains($"{spouse}"))
                     {
-                        continue;
+                        var entry = npcExtData[spouse.Name] as dynamic;
+                        if (entry?.IgnoreMarriageSchedule ?? false)
+                        {
+                            continue;
+                        }
                     }
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 }
+
+
+                var data = helper.GameContent.Load<Dictionary<string, PolyamoryData>>($"{modid}/PolyamoryData");
+
+                bool WillGoOutsideToday = spouse.Schedule != null;
+                bool CanGoInTheSun = data != null && data.ContainsKey(spouse.Name) && data[spouse.Name].CanGoOutInTheSun;
+                    
                 if (!farmHouse.Equals(spouse.currentLocation))
                 {
-#if !RELEASE
-                    monitor.Log($"{spouse.Name} is not in farm house ({spouse.currentLocation.Name})");
-#endif
                     continue;
                 }
                 int type = random.Next(0, 100);
 
-#if !RELEASE
-                monitor.Log($"spouse rand {type}, bed: {Config.PercentChanceForSpouseInBed} kitchen {Config.PercentChanceForSpouseInKitchen}");
-#endif
-
                 if (BedSpouses.Count <= MathF.Ceiling(Spouses.Count / 4) && (!farmer.friendshipData[spouse.Name].IsRoommate()) && HasSleepingAnimation(spouse.Name) && type < Config.PercentChanceForSpouseInBed)
                 {
-#if !RELEASE
-                    monitor.Log("made bed spouse: " + spouse.Name);
-#endif
                     BedSpouses.Add(spouse.Name);
                 }
                 else if (KitchenSpouse is null && type < Config.PercentChanceForSpouseInBed + Config.PercentChanceForSpouseInKitchen)
                 {
-#if !RELEASE
-                    monitor.Log("made kitchen spouse: " + spouse.Name);
-#endif
                     KitchenSpouse = spouse.Name;
                 }
-                else if (PorchSpouse is null && PatioSpouse is null && type < Config.PercentChanceForSpouseInBed + Config.PercentChanceForSpouseInKitchen + Config.PercentChangeForSpouseInPorch)
+                else if (PorchSpouse is null && !WillGoOutsideToday && CanGoInTheSun && type < Config.PercentChanceForSpouseInBed + Config.PercentChanceForSpouseInKitchen + Config.PercentChangeForSpouseInPorch)
                 {
-#if !RELEASE
-                    monitor.Log("made porch spouse: " + spouse.Name);
-#endif
                     PorchSpouse = spouse.Name;
                 }
                 else if (type < Config.PercentChanceForSpouseInBed + Config.PercentChanceForSpouseInKitchen + Config.PercentChangeForSpouseInPorch + Config.PercentChanceForSpouseAtPatio)
                 {
-                    if (PatioSpouse is null && PorchSpouse is null && !Game1.isRaining && !Game1.IsWinter && !Game1.shortDayNameFromDayOfSeason(Game1.dayOfMonth).Equals("Sat") && !spouse.Name.Equals("Krobus") && spouse.Schedule == null)
+                    if (PatioSpouse is null && !Game1.isRaining && !Game1.IsWinter && !WillGoOutsideToday && CanGoInTheSun)
                     {
-#if !RELEASE
-                        monitor.Log("made patio spouse: " + spouse.Name);
-#endif
                         spouse.setUpForOutdoorPatioActivity();
                         PatioSpouse = spouse.Name;
                     }
@@ -340,18 +335,21 @@ namespace Polyamory
             Point SpouseRoomSpot = farmHouse.spouseRoomSpot;
             foreach (NPC spouse in allSpouses)
             {
-                IDictionary npcExtData = Game1.content.Load<IDictionary>("spacechase0.SpaceCore/NpcExtensionData");
-                if (npcExtData is not null && npcExtData.Contains($"{spouse}"))
+                if (helper.ModRegistry.IsLoaded("spacechase0.SpaceCore"))
                 {
-                    var entry = npcExtData[spouse.Name] as dynamic;
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
-                    if (entry.IgnoreMarriageSchedule)
+                    IDictionary npcExtData = Game1.content.Load<IDictionary>("spacechase0.SpaceCore/NpcExtensionData");
+                    if (npcExtData is not null && npcExtData.Contains($"{spouse}"))
                     {
-                        continue;
+                        var entry = npcExtData[spouse.Name] as dynamic;
+                        if (entry?.IgnoreMarriageSchedule ?? false)
+                        {
+                            continue;
+                        }
                     }
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 }
+
                 if (PatioSpouse == spouse.Name) continue;
+
                 if (BedSpouses is not null && BedSpouses.Contains(spouse.Name))
                 {
 #if !RELEASE
@@ -363,9 +361,6 @@ namespace Polyamory
                 }
                 else if (KitchenSpouse is not null && KitchenSpouse == spouse.Name)
                 {
-#if !RELEASE
-                    monitor.Log("Placing kitchen spouse");
-#endif
                     Point KitchenSpot = farmHouse.getKitchenStandingSpot();
                     spouse.setTilePosition(KitchenSpot);
                     spouse.setRandomAfternoonMarriageDialogue(Game1.timeOfDay, farmHouse, false);
@@ -373,9 +368,6 @@ namespace Polyamory
                 }
                 else if (PorchSpouse is not null && PorchSpouse == spouse.Name)
                 {
-#if !RELEASE
-                    monitor.Log("Placing porch spouse");
-#endif
                     Point PorchSpot = farmHouse.getPorchStandingSpot();
                     Game1.warpCharacter(spouse, "Farm", PorchSpot);
                     spouse.faceDirection(2);
@@ -383,17 +375,11 @@ namespace Polyamory
                 }
                 else if (SpouseRoomSpot.X > -1 && !IsTileOccupied(farmHouse, SpouseRoomSpot, spouse.Name))
                 {
-#if !RELEASE
-                    monitor.Log($"Placing spouse room spouse");
-#endif
                     spouse.setTilePosition(SpouseRoomSpot);
                     spouse.setSpouseRoomMarriageDialogue();
                 }
                 else
                 {
-#if !RELEASE
-                    monitor.Log("Placing other spouses");
-#endif
                     Point RandomSpot = farmHouse.getRandomOpenPointInHouse(random);
                     int i = 0;
                     while (i < 100 && RandomSpot == Point.Zero)
@@ -402,9 +388,6 @@ namespace Polyamory
                     }
                     if (RandomSpot == Point.Zero)
                     {
-#if !RELEASE
-                        monitor.Log("Placing bed spouses");
-#endif
                         Vector2 bedSpot = GetSpouseBedPosition(farmHouse, spouse.Name) / 64f;
                         spouse.setTileLocation(bedSpot);
                         continue;
@@ -452,7 +435,7 @@ namespace Polyamory
         public static List<string> ReorderSpousesForSleeping(List<string> sleepSpouses)
         {
             List<string> configSpouses = Config.SpouseSleepOrder.Split(',').Where(s => s.Length > 0).ToList();
-            List<string> spouses = new();
+            List<string> spouses = [];
             foreach (string s in configSpouses)
             {
                 if (sleepSpouses.Contains(s))
@@ -603,10 +586,18 @@ namespace Polyamory
             return false;
         }
 
-        public static Dialogue FetchAppropriateDialogue(NPC npc, Farmer who, int Type)
+        public enum DialogueType
         {
+            Bouquet = 0,
+            Pendant = 1,
+            Roommate = 2
+        }
+
+        public static Dialogue FetchAppropriateDialogue(NPC npc, Farmer who, DialogueType DType)
+        {
+            int Type = (int)DType;
             var partners = PeopleDating(who);
-            string[] DialogueType = { "RejectBouquet", "RejectMermaidPendant", "RejectRoommateProposal" };
+            string[] DialogueType = [ "RejectBouquet", "RejectMermaidPendant", "RejectRoommateProposal" ];
             if (!IsNpcPolyamorous(npc.Name))
             {
                 Dialogue dialogue = npc.TryGetDialogue(DialogueType[Type] + "_IsMonogamous_PlayerWithOtherPeople", Game1.getCharacterFromName(partners[random.Next(0, partners.Count - 1)]).displayName);

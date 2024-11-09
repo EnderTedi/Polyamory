@@ -55,5 +55,8 @@
   },
   "Shane": {
     "NegativeChemistry": [ "Marnie" ]
+  },
+  "Krobus": {
+    "CanGoOutInTheSun": false
   }
 }
