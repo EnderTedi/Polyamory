@@ -1,4 +1,7 @@
 
+* 1.0-Beta.4-Hotfix.1
+	- Fix for issues with PlayerSpouse Token
+
 * 1.0-Beta.4
 	- Updated for Stardew Valley 1.6.9+ and SMAPI 4.1.0+
 	- Introduces new Player argument to custom tokens, more details in updated Docs.

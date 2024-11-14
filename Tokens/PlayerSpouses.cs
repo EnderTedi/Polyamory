@@ -1,5 +1,4 @@
 ﻿using StardewValley;
-using StardewModdingAPI;
 using StardewValley.Extensions;
 
 namespace Polyamory.Tokens
@@ -79,7 +78,14 @@ namespace Polyamory.Tokens
                 "local" => Game1.player,
                 _ => Game1.player,
             };
+
             var Spouses = Polyamory.GetSpouses(Player, true).Keys.ToList();
+
+            if (Spouses.Count <= 0)
+            {
+                return ["None"];
+            }
+
             Spouses.Sort(delegate (string a, string b) {
                 Player.friendshipData.TryGetValue(a, out Friendship af);
                 Player.friendshipData.TryGetValue(b, out Friendship bf);
